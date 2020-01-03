@@ -46,9 +46,9 @@ registerBlockType('osx/dhis2-analytics', {
 			source: 'html',
 			selector: 'p',
 		},
-		dashboard_items:{
+		dashboard_items: {
 			type: 'array',
-			default: []
+			default: [],
 		},
 		checkboxField: {
 			type: 'boolean',
@@ -82,26 +82,25 @@ registerBlockType('osx/dhis2-analytics', {
 	 */
 	edit: (props) => {
 		// Creates a <p class='wp-block-cgb-block-dhis2-analytics'></p>.
-		const plugin_url = osxGlobal.pluginDirUrl;
-		const updateSelectedItems = (item)=>(e) => {
+		// const plugin_url = osxGlobal.pluginDirUrl;
+		const updateSelectedItems = (item) => (e) => {
 			const checked = e.target.checked;
-			let {attributes:{dashboard_items}} = props
-	
+			let { attributes: { dashboard_items } } = props;
 			if (checked) {
-				if(dashboard_items.indexOf(item) === -1){
-					dashboard_items = [...dashboard_items,item]
+				if (dashboard_items.indexOf(item) === -1) {
+					dashboard_items = [...dashboard_items, item];
 				}
 			} else {
-				dashboard_items = dashboard_items.filter(i=>i!==item)
+				dashboard_items = dashboard_items.filter(i => i !== item);
 			}
 			props.attributes.dashboard_items = dashboard_items;
 			// this.setAttributes({ dashboard_items: dashboard_items });
-			props.setAttributes({dashboard_items: props.attributes.dashboard_items})
+			props.setAttributes({ dashboard_items: props.attributes.dashboard_items });
 			// console.log(props)
 		};
 		return (
 			<div className={props.className}>
-				<p class="instruction">Select the dashboard items that you want to be display in this block. Please note that for single item display option, you MUST select only one dashboard item </p>
+				<p className="instruction">Select the dashboard items that you want to be display in this block. Please note that for single item display option, you MUST select only one dashboard item </p>
 				<Dashboards onChange={updateSelectedItems} />
 			</div>
 		);
@@ -118,8 +117,7 @@ registerBlockType('osx/dhis2-analytics', {
 	 * @param {Object} props Props.
 	 * @returns {Mixed} JSX Frontend HTML.
 	 */
-	save: (props) => {
-		// console.log(props);
+	save: () => {
 		return (
 			null
 		);
