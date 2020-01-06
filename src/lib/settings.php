@@ -107,7 +107,6 @@ function dhis2_options_page(  ) {
 			do_settings_sections( 'pluginPage' );
 			submit_button();
 			?>
-
 		</form>
 		<?php
 
