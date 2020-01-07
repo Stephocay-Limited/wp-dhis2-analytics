@@ -8,18 +8,33 @@
 //  Import CSS.
 import './editor.scss';
 import './style.scss';
+import axios from 'axios';
+import { BorderAll, Help, Public, BarChart } from '@material-ui/icons';
 
-import { Dashboards } from './components/dashboards';
-
-const { __ } = wp.i18n; // Import __() from wp.i18n
-const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.blocks
-// const { BlockControls } = wp.editor.BlockControls;
-// import { TextControl } from wp.editor.TextControl;
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
 const { InspectorControls } = wp.editor;
-const { PanelBody, SelectControl, TextControl, ToggleControl, CheckboxControl } = wp.components;
-let el = wp.element.createElement
+const { Component } = wp.element;
+const { PanelBody, SelectControl, TextControl, ToggleControl } = wp.components;
 
+// eslint-disable-next-line no-undef
+const dhis_settings = osxGlobal.dhis2setting;
+const dhis2_uri = dhis_settings.dhis2_uri;
+const dhis2_username = dhis_settings.dhis2_username;
+const dhis2_password = dhis_settings.dhis2_passsword;
+const dashboard_url = dhis2_uri + '/api/dashboards.json?paging=false&fields=id,name,dashboardItems[type,reportTable[id,displayName],chart[id,displayName],map[id,displayName]]';
 
+const getDashboards = async () => {
+	const res = await axios.get(dashboard_url, {
+		params: {},
+		withCredentials: true,
+		auth: {
+			username: dhis2_username,
+			password: dhis2_password,
+		},
+	});
+	return res.data;
+};
 /**
  * Register: aa Gutenberg Block.
  *
@@ -96,124 +111,175 @@ registerBlockType('osx/dhis2-analytics', {
 	 * @param {Object} props Props.
 	 * @returns {Mixed} JSX Component.
 	 */
-	edit: (props) => {
-		console.log(props);
-		let content = props.attributes.content,
-			checkboxField = props.attributes.checkboxField,
-			radioField = props.attributes.radioField,
-			textField = props.attributes.textField,
-			toggleField = props.attributes.toggleField,
-			dashboard_items = props.attributes.dashboard_items,
-			displayItem = props.attributes.displayItem,
-			displayMode = props.attributes.displayMode,
-			displaySize = props.attributes.displaySize,
-			displayWidth = props.attributes.displayWidth,
-			displayLength = props.attributes.displayLength,
-			enableCaption = props.attributes.enableCaption;
-
-		const onChangeContent = (newContent) => {
-			props.setAttributes({ content: newContent });
+	edit: class extends Component {
+		constructor() {
+			super(...arguments);
+			this.state = { dhisdata: [] };
 		}
 
-		const onChangeCheckboxField = (newValue) => {
-			props.setAttributes({ checkboxField: newValue });
+		onChangeContent = (newContent) => {
+			this.props.setAttributes({ content: newContent });
 		}
 
-		const onChangeDisplayItem = (newValue) => {
-			props.setAttributes({ displayItem: newValue });
+		onChangeCheckboxField = (newValue) => {
+			this.props.setAttributes({ checkboxField: newValue });
+		}
+
+		onChangeDisplayItem = (newValue) => {
+			this.props.setAttributes({ displayItem: newValue });
 		};
 
-		const onChangeDisplayMode = (newValue) => {
-			props.setAttributes({ displayMode: newValue });
+		onChangeDisplayMode = (newValue) => {
+			this.props.setAttributes({ displayMode: newValue });
 		};
 
-		const onChangeDisplaySize = (newValue) => {
-			props.setAttributes({ displaySize: newValue });
+		onChangeDisplaySize = (newValue) => {
+			this.props.setAttributes({ displaySize: newValue });
 		};
 
-		const onChangeDisplayWidth = (newValue) => {
-			props.setAttributes({ displayWidth: newValue });
+		onChangeDisplayWidth = (newValue) => {
+			this.props.setAttributes({ displayWidth: newValue });
 		};
 
-		const onChangeDisplayLength = (newValue) => {
-			props.setAttributes({ displayLength: newValue });
+		onChangeDisplayLength = (newValue) => {
+			this.props.setAttributes({ displayLength: newValue });
 		};
 
-		const onChangeEnableCaption = (newValue) => {
-			props.setAttributes({ enableCaption: newValue });
+		onChangeEnableCaption = (newValue) => {
+			this.props.setAttributes({ enableCaption: newValue });
 		};
 
-		// Creates a <p class='wp-block-cgb-block-dhis2-analytics'></p>.
-		// const plugin_url = osxGlobal.pluginDirUrl;
-		const updateSelectedItems = (item) => (e) => {
+		componentDidMount() {
+			getDashboards().then(data => {
+				const filtered = data.dashboards.map(dashboard => {
+					const dashboardItems = dashboard.dashboardItems.map(item => {
+						return { ...item, data: item.reportTable || item.map || item.chart };
+					}).filter(di => {
+						return di.data;
+					});
+					return { ...dashboard, dashboardItems };
+				});
+				this.setState(
+					{ dhisdata: { dashboards: filtered } }
+				);
+			});
+		}
+		updateSelectedItems = (item) => (e) => {
 			const checked = e.target.checked;
-			let { attributes: { dashboard_items } } = props;
+			let { attributes: { dashboard_items } } = this.props;
 			if (checked) {
 				if (dashboard_items.indexOf(item) === -1) {
 					dashboard_items = [...dashboard_items, item];
 				}
 			} else {
-				dashboard_items = dashboard_items.filter(i => i !== item);
+				dashboard_items = dashboard_items.filter(i => {
+					return i.data.id !== item.data.id;
+				});
 			}
-			props.attributes.dashboard_items = dashboard_items;
-			// this.setAttributes({ dashboard_items: dashboard_items });
-			props.setAttributes({ dashboard_items: props.attributes.dashboard_items });
-			// console.log(props)
+			this.props.setAttributes({ dashboard_items });
 		};
-		return (
-			<div className={props.className}>
-				<p className="instruction">Select the dashboard items that you want to be display in this block. Please note that for single item display option, you MUST select only one dashboard item </p>
-				<Dashboards onChange={updateSelectedItems} />
-				<InspectorControls>
-					<PanelBody
-						title={__('Display settings')}
-						initialOpen={true}
-					>
-						<CheckboxControl label="Tick Me" checked={checkboxField} onChange={
-							onChangeCheckboxField}>
 
-						</CheckboxControl>
+		render() {
+			const { dashboards } = this.state.dhisdata;
 
-						<SelectControl
-							label="Display Items"
-							value={displayItem}
-							options={[
-								{ value: 'single', label: 'Single Item' },
-								{ value: 'multiple', label: 'Multiple Items' }
-							]}
-							onChange={onChangeDisplayItem} >
-						</SelectControl>
-						<SelectControl
-							label="Display Mode"
-							value={displayMode}
-							options={[
-								{ value: 'slideshow', label: 'Slideshow Display' },
-								{ value: 'stack', label: 'Stacked Display' },
-								{ value: 'report', label: 'Report Display' }
-							]}
-							onChange={onChangeDisplayMode} >
-						</SelectControl>
-						<SelectControl
-							label="Display Size"
-							value={displaySize}
-							options={[
-								{ value: 'fullwidth', label: 'Fullwidth' },
-								{ value: 'custom', label: 'Custom size' }
-							]}
-							onChange={onChangeDisplaySize} >
-						</SelectControl>
-						<TextControl label="Custom width (%)" value={displayWidth} onChange={onChangeDisplayWidth}></TextControl>
-						<TextControl label="Custom Length (%)" value={displayLength} onChange={onChangeDisplayLength}></TextControl>
-						<ToggleControl label="Enable Captions" checked={enableCaption} onChange={onChangeEnableCaption}></ToggleControl>
-						{/* Panel items goes here */}
-					</PanelBody>
-					<PanelBody
-						title={__('Slideshow settings')}
-						initialOpen={false}
-					></PanelBody>
-				</InspectorControls>
-			</div>
-		);
+			const { displayItem, displayMode, displaySize, displayWidth, displayLength, enableCaption } = this.props.attributes;
+			let listDashboards = null;
+			if (dashboards) {
+				listDashboards = dashboards.filter(d => d.dashboardItems.length > 0).map((dashboard) =>
+					<li className="a-items" key={dashboard.id}>
+						<input type="radio" name="ac" id={dashboard.id} />
+						<label htmlFor={dashboard.id}>{dashboard.name}</label>
+						<div className="a-content">
+							<ul className="dashboard-items">
+								{
+									dashboard.dashboardItems.map((dashboardItem) => {
+										const type = dashboardItem.type;
+										let icon = <Help className="item-type-icon" />;
+										if (type === 'CHART') {
+											icon = <BarChart className="item-type-icon" />;
+										} else if (type === 'REPORT_TABLE') {
+											icon = <BorderAll className="item-type-icon" />;
+										} else if (type === 'MAP') {
+											icon = <Public className="item-type-icon" />;
+										}
+										return <li key={dashboardItem.data.id} className="dashboard-item">
+											<label htmlFor={dashboardItem.data.id} className="dashboard-item-label">
+												{icon}
+												<span className="dashboard-item-name">{dashboardItem.data.displayName}</span>
+												<input type="checkbox"
+													checked={this.props.attributes.dashboard_items.map(i => i.data.id).indexOf(dashboardItem.data.id) !== -1}
+													value={dashboardItem.data.id}
+													id={dashboardItem.data.id}
+													onChange={this.updateSelectedItems(dashboardItem)}
+													className="select-items"
+													style={{ marginLeft: 'auto' }}
+												/>
+											</label>
+										</li>;
+									})
+								}
+							</ul>
+						</div>
+					</li>
+				);
+			} else {
+				listDashboards = 'No Dashboard Found';
+			}
+			return (
+				<div>
+					<h4 className="dhis2-header">DHIS2 Dashboard Block Settings</h4>
+					<ul className="a-container">
+						{
+							(dashboards) ? listDashboards : <p className="no-data-found">No Dashboards found</p>
+						}
+					</ul>
+					<InspectorControls>
+						<PanelBody
+							title={__('Display settings')}
+							initialOpen={true}
+						>
+
+							<SelectControl
+								label="Display Items"
+								value={displayItem}
+								options={[
+									{ value: 'single', label: 'Single Item' },
+									{ value: 'multiple', label: 'Multiple Items' }
+								]}
+								onChange={this.onChangeDisplayItem} >
+							</SelectControl>
+							<SelectControl
+								label="Display Mode"
+								value={displayMode}
+								options={[
+									{ value: 'slideshow', label: 'Slideshow Display' },
+									{ value: 'stack', label: 'Stacked Display' },
+									{ value: 'report', label: 'Report Display' }
+								]}
+								onChange={this.onChangeDisplayMode} >
+							</SelectControl>
+							<SelectControl
+								label="Display Size"
+								value={displaySize}
+								options={[
+									{ value: 'fullwidth', label: 'Fullwidth' },
+									{ value: 'custom', label: 'Custom size' }
+								]}
+								onChange={this.onChangeDisplaySize} >
+							</SelectControl>
+							<TextControl label="Custom width (%)" value={displayWidth} onChange={this.onChangeDisplayWidth}></TextControl>
+							<TextControl label="Custom Length (%)" value={displayLength} onChange={this.onChangeDisplayLength}></TextControl>
+							<ToggleControl label="Enable Captions" checked={enableCaption} onChange={this.onChangeEnableCaption}></ToggleControl>
+							{/* Panel items goes here */}
+						</PanelBody>
+						<PanelBody
+							title={__('Slideshow settings')}
+							initialOpen={false}
+						></PanelBody>
+					</InspectorControls>
+				</div>
+			);
+		}
 	},
 
 	/**
