@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 function remove_theme_jquery_scripts() {
 	//Add other Theme JQUERY for all Custom themes supported here
 	wp_dequeue_script( 'jquery.min' ); 
- }
- add_action( 'wp_print_scripts', 'remove_theme_jquery_scripts', 100 );
+}
+add_action( 'wp_print_scripts', 'remove_theme_jquery_scripts', 100 );
 
 
 function dhis2_analytics_assets(){
@@ -102,49 +102,49 @@ function dhis2_analytics_assets(){
 		['jquery','wp-blocks'],
 		null,
 		false
-	  );
+	);
 
-	  wp_enqueue_script('googlemaps-js');
+	wp_enqueue_script('googlemaps-js');
 	
-	  wp_register_script(
+	wp_register_script(
 		'plugin-tables-js',
 		plugins_url( 'src/assets/js/new/reporttable.js', dirname( __FILE__ ) ),
 		['jquery', 'dhis2_analytics-js','ext-all-js','wp-blocks'],
 		null,
 		false
-	  );
+	);
 
-	  wp_enqueue_script('plugin-tables-js');
+	wp_enqueue_script('plugin-tables-js');
 	
-	  wp_register_script(
+	wp_register_script(
 		'plugin-maps-js',
 		plugins_url('src/assets/js/new/map.js',dirname( __FILE__ ) ),
 		['jquery','openlayer-js','dhis2_analytics-js','ext-all-js','wp-blocks'],
 		null,
 		false
-	  );
+	);
 
-	  wp_enqueue_script('plugin-maps-js');
+	wp_enqueue_script('plugin-maps-js');
 	
-	  wp_register_script(
+	wp_register_script(
 		'plugin-chart-js',
 		plugins_url( 'src/assets/js/new/chart.js', dirname( __FILE__ ) ),
 		['jquery','ext-all-js','dhis2_analytics-js','wp-blocks'],
 		null,
 		false
-	  );
+	);
 
-	  wp_enqueue_script('plugin-chart-js');
+	wp_enqueue_script('plugin-chart-js');
 	
-	  wp_register_script(
+	wp_register_script(
 		'bxslider-js',
 		plugins_url( 'src/assets/bxslider/jquery.bxslider.min.js', dirname( __FILE__ ) ),
 		['jquery','wp-blocks','wp-editor','ext-all-js'],
 		true,
 		false
-	  );
+	);
 
-	  wp_enqueue_script('bxslider-js');
+	wp_enqueue_script('bxslider-js');
 
 	  // WP Localized globals. Use dynamic PHP stuff in JavaScript via `osxGlobal` object.
 	$settings = get_option( 'dhis2_settings' );
@@ -172,13 +172,29 @@ function dhis2_analytics_assets(){
 			// Enqueue blocks.editor.build.css in the editor only.
 			'editor_style'  => 'dhis2_analytics-editor-css',
 		)
-	);
-	
-	
+	);	
 }
 
 add_action( 'wp_enqueue_scripts', 'dhis2_analytics_assets' );
 add_action( 'admin_enqueue_scripts', 'dhis2_analytics_assets' );
+
+
+// Front end Assets ONLY
+function dhis2_analytics_style() {
+	wp_enqueue_style( 'dhis2_analytics-frontend-css', 
+		plugins_url( 'src/assets/css/frontend/dhis2-analytics.css', dirname( __FILE__ ) ), 
+		false 
+	);
+}
+function dhis2_analytics_script() {
+	wp_enqueue_script( 'dhis2_analytics-frontend-js', 
+		plugins_url( 'src/assets/js/frontend/dhis2-analytics.js', dirname( __FILE__ ) ), 
+		['jquery'],
+		false 
+	);
+}
+add_action( 'wp_enqueue_scripts', 'dhis2_analytics_style' );
+add_action( 'wp_enqueue_scripts', 'dhis2_analytics_script' );
 
 //Creates DYnamic Blocks
 add_action('plugins_loaded', 'register_dynamic_block');
@@ -187,7 +203,6 @@ function register_dynamic_block() {
 	if (!function_exists('register_block_type')) {
 		return;
 	}
-
 	// Hook server side rendering into render callback
 	// Make sure name matches registerBlockType in ./index.js
 	register_block_type('osx/dhis2-analytics', array(
@@ -385,8 +400,10 @@ function render_dynamic_block($attributes) {
 			
 		}
 	}
+
+	
 	?>
-	<div id="bxslider" class="bxslider">
+	 <div id="bxslider" class="bxslider">
 		<?php
 			if(!empty($reporttable_analysis)){
 				displayTable($reporttable_analysis, $details, $rt_ids);
@@ -399,24 +416,28 @@ function render_dynamic_block($attributes) {
 			}
 		?>
 	</div>
-	<script>
-    $(document).ready(function(){
-      $('.bxslider').bxSlider({
-		mode: 'fade',
-		pause: 20000,
-		responsive: true,
-		captions: true,
-		slideSelector: 'div.dhis2-slide',
-		pager: false,
-		auto: true,
-		autoDirection: true,
-		autoHover: true,
-		keyboardEnabled: true
-	  });
-    });
-  </script>
-	<?php
-	// ob_end_clean();
+
+	<!-- <script>
+		$(document).ready(function(){
+			$('.bxslider').bxSlider({
+				mode: 'fade',
+				pause: 20000,
+				responsive: true,
+				captions: true,
+				slideSelector: 'div.dhis2-slide',
+				pager: false,
+				auto: true,
+				autoDirection: true,
+				autoHover: true,
+				keyboardEnabled: true
+			});
+		});
+	</script> -->
+<?php
+	$output = ob_get_contents(); // collect output
+	ob_end_clean(); // Turn off ouput buffer
+  
+	return $output; // Print output
 }
 
 include __DIR__ . '/lib/settings.php';
