@@ -21,7 +21,7 @@ const { PanelBody, SelectControl, TextControl, ToggleControl } = wp.components;
 const dhis_settings = osxGlobal.dhis2setting;
 const dhis2_uri = dhis_settings.dhis2_uri;
 const dhis2_username = dhis_settings.dhis2_username;
-const dhis2_password = dhis_settings.dhis2_passsword;
+const dhis2_password = dhis_settings.dhis2_password;
 const dashboard_url = dhis2_uri + '/api/dashboards.json?paging=false&fields=id,name,dashboardItems[type,reportTable[id,displayName],chart[id,displayName],map[id,displayName]]';
 
 const getDashboards = async () => {
@@ -238,7 +238,6 @@ registerBlockType('osx/dhis2-analytics', {
 							title={__('Display settings')}
 							initialOpen={true}
 						>
-
 							<SelectControl
 								label="Display Items"
 								value={displayItem}
