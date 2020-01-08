@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).ready(function(){
     $('.bxslider').bxSlider({
         mode: 'fade',
         pause: 20000,
@@ -9,8 +9,6 @@ $(document).ready(function () {
         auto: true,
         autoDirection: true,
         autoHover: true,
-        keyboardEnabled: true,
-        adaptiveHeight: true,
-        controls: true
+        keyboardEnabled: true
     });
 });

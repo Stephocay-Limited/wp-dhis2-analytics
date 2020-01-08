@@ -8,10 +8,11 @@
 		"eject": "cgb-scripts eject"
 	},
 	"dependencies": {
-		"@material-ui/core": "^4.5.2",
+		"@material-ui/core": "^4.8.3",
 		"@material-ui/icons": "^4.5.1",
 		"axios": "^0.19.0",
-		"cgb-scripts": "1.20.0"
+		"cgb-scripts": "1.20.0",
+		"shortid": "^2.2.15"
 	},
 	"devDependencies": {
 		"mem": ">=4.0.0"

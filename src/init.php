@@ -417,22 +417,22 @@ function render_dynamic_block($attributes) {
 		?>
 	</div>
 
-	<!-- <script>
-		$(document).ready(function(){
-			$('.bxslider').bxSlider({
-				mode: 'fade',
-				pause: 20000,
-				responsive: true,
-				captions: true,
-				slideSelector: 'div.dhis2-slide',
-				pager: false,
-				auto: true,
-				autoDirection: true,
-				autoHover: true,
-				keyboardEnabled: true
-			});
-		});
-	</script> -->
+	<!-- <script> -->
+		// $(document).ready(function(){
+		// 	$('.bxslider').bxSlider({
+		// 		mode: 'fade',
+		// 		pause: 20000,
+		// 		responsive: true,
+		// 		captions: true,
+		// 		slideSelector: 'div.dhis2-slide',
+		// 		pager: false,
+		// 		auto: true,
+		// 		autoDirection: true,
+		// 		autoHover: true,
+		// 		keyboardEnabled: true
+		// 	});
+		// });
+	// </script>
 <?php
 	$output = ob_get_contents(); // collect output
 	ob_end_clean(); // Turn off ouput buffer

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { BorderAll, Help, Public, BarChart } from '@material-ui/icons';
+import shortid from 'shortid';
 // import Help from '@material-ui/icons/Help';
 // import Public from '@material-ui/icons/Public';
 // import BarChart from '@material-ui/icons/BarChart';
@@ -64,13 +65,12 @@ export class Dashboards extends Component {
 		const { onChange } = this.props;
 		if (dashboards) {
 			listDashboards = dashboards.filter(d => d.dashboardItems.length > 0).map((dashboard) =>
-				<li className="a-items" key={dashboard.id}>
+				<li className="a-items" key={`${dashboard.id}-${shortid.generate()}`}>
 					<input type="radio" name="ac" id={dashboard.id} />
 					<label htmlFor={dashboard.id}>{dashboard.name}</label>
 					<div className="a-content">
-						<ul className="dashboard-items">
+						<ul className="dashboard-items" >
 							{
-
 								dashboard.dashboardItems.map((dashboardItem) => {
 									const type = dashboardItem.type;
 									let icon = <Help className="item-type-icon" />;

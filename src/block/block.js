@@ -10,6 +10,11 @@ import './editor.scss';
 import './style.scss';
 import axios from 'axios';
 import { BorderAll, Help, Public, BarChart } from '@material-ui/icons';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import Typography from '@material-ui/core/Typography';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
@@ -114,7 +119,7 @@ registerBlockType('osx/dhis2-analytics', {
 	edit: class extends Component {
 		constructor() {
 			super(...arguments);
-			this.state = { dhisdata: [] };
+			this.state = { dhisdata: [], expanded: null };
 		}
 
 		onChangeContent = (newContent) => {
@@ -147,6 +152,12 @@ registerBlockType('osx/dhis2-analytics', {
 
 		onChangeEnableCaption = (newValue) => {
 			this.props.setAttributes({ enableCaption: newValue });
+		};
+
+		handleChange = panel => (event, isExpanded) => {
+			this.setState({
+				expanded: isExpanded ? panel : false
+			})
 		};
 
 		componentDidMount() {
@@ -186,10 +197,16 @@ registerBlockType('osx/dhis2-analytics', {
 			let listDashboards = null;
 			if (dashboards) {
 				listDashboards = dashboards.filter(d => d.dashboardItems.length > 0).map((dashboard) =>
-					<li className="a-items" key={dashboard.id}>
-						<input type="radio" name="ac" id={dashboard.id} />
-						<label htmlFor={dashboard.id}>{dashboard.name}</label>
-						<div className="a-content">
+					<ExpansionPanel expanded={this.state.expanded === dashboard.id} onChange={this.handleChange(dashboard.id)}>
+						<ExpansionPanelSummary
+							expandIcon={<ExpandMoreIcon />}
+							aria-controls="panel1bh-content"
+							id="panel1bh-header"
+						>
+							<Typography>{dashboard.name}</Typography>
+						</ExpansionPanelSummary>
+						<ExpansionPanelDetails>
+
 							<ul className="dashboard-items">
 								{
 									dashboard.dashboardItems.map((dashboardItem) => {
@@ -219,8 +236,9 @@ registerBlockType('osx/dhis2-analytics', {
 									})
 								}
 							</ul>
-						</div>
-					</li>
+						</ExpansionPanelDetails>
+					</ExpansionPanel>
+
 				);
 			} else {
 				listDashboards = 'No Dashboard Found';
@@ -242,6 +260,7 @@ registerBlockType('osx/dhis2-analytics', {
 								label="Display Items"
 								value={displayItem}
 								options={[
+									{ value: '', label: 'Select Options' },
 									{ value: 'single', label: 'Single Item' },
 									{ value: 'multiple', label: 'Multiple Items' }
 								]}
@@ -251,6 +270,7 @@ registerBlockType('osx/dhis2-analytics', {
 								label="Display Mode"
 								value={displayMode}
 								options={[
+									{ value: '', label: 'Select Options' },
 									{ value: 'slideshow', label: 'Slideshow Display' },
 									{ value: 'stack', label: 'Stacked Display' },
 									{ value: 'report', label: 'Report Display' }
@@ -261,6 +281,7 @@ registerBlockType('osx/dhis2-analytics', {
 								label="Display Size"
 								value={displaySize}
 								options={[
+									{ value: '', label: 'Select Options' },
 									{ value: 'fullwidth', label: 'Fullwidth' },
 									{ value: 'custom', label: 'Custom size' }
 								]}
