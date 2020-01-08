@@ -203,11 +203,11 @@ registerBlockType('osx/dhis2-analytics', {
 							aria-controls="panel1bh-content"
 							id="panel1bh-header"
 						>
-							<Typography>{dashboard.name}</Typography>
+							<Typography className="dashboard-name" style={{marginTop:0, marginBottom:0}}>{dashboard.name}</Typography>
 						</ExpansionPanelSummary>
 						<ExpansionPanelDetails>
 
-							<ul className="dashboard-items">
+							<ul className="dashboard-items" style={{margin:0, padding:0}}>
 								{
 									dashboard.dashboardItems.map((dashboardItem) => {
 										const type = dashboardItem.type;
@@ -246,7 +246,7 @@ registerBlockType('osx/dhis2-analytics', {
 			return (
 				<div>
 					<h4 className="dhis2-header">DHIS2 Dashboard Block Settings</h4>
-					<ul className="a-container">
+					<ul className="analytics-dashboards" style={{margin:0, padding:0}}>
 						{
 							(dashboards) ? listDashboards : <p className="no-data-found">No Dashboards found</p>
 						}

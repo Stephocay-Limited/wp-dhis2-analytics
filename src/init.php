@@ -344,6 +344,7 @@ function render_dynamic_block($attributes) {
 	ob_start();
 	$dashboard_items = $attributes['dashboard_items'];
 	// print_r($dashboard_items);
+	// print_r($attributes);
 	$settings = get_option( 'dhis2_settings' );
 	$details = json_encode($settings);
 	$base=$settings['dhis2_uri'];
@@ -416,23 +417,6 @@ function render_dynamic_block($attributes) {
 			}
 		?>
 	</div>
-
-	<!-- <script> -->
-		// $(document).ready(function(){
-		// 	$('.bxslider').bxSlider({
-		// 		mode: 'fade',
-		// 		pause: 20000,
-		// 		responsive: true,
-		// 		captions: true,
-		// 		slideSelector: 'div.dhis2-slide',
-		// 		pager: false,
-		// 		auto: true,
-		// 		autoDirection: true,
-		// 		autoHover: true,
-		// 		keyboardEnabled: true
-		// 	});
-		// });
-	// </script>
 <?php
 	$output = ob_get_contents(); // collect output
 	ob_end_clean(); // Turn off ouput buffer
