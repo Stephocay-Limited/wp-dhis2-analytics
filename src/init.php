@@ -344,7 +344,7 @@ function render_dynamic_block($attributes) {
 	ob_start();
 	$dashboard_items = $attributes['dashboard_items'];
 	// print_r($dashboard_items);
-	// print_r($attributes);
+	print_r($attributes);
 	$settings = get_option( 'dhis2_settings' );
 	$details = json_encode($settings);
 	$base=$settings['dhis2_uri'];
@@ -402,22 +402,43 @@ function render_dynamic_block($attributes) {
 		}
 	}
 
-	
-	?>
-	 <div id="bxslider" class="bxslider">
-		<?php
-			if(!empty($reporttable_analysis)){
-				displayTable($reporttable_analysis, $details, $rt_ids);
-			}
-			if(!empty($map_analysis)){
-				displayMap($map_analysis, $details, $map_ids);
-			}
-			if(!empty($chart_analysis)){
-				displayChart($chart_analysis, $details, $chart_ids);
-			}
+	$displayItems = $attributes['displayItem'];
+	if($displayItems == "single"){
+		$id = $attributes['dashboard_items'][0]['data']['id'];
+		// $id = "HSHH";
 		?>
-	</div>
-<?php
+			<div id="<?php echo $id; ?>" class="dhis2-analytics-single">
+			<?php
+					if(!empty($reporttable_analysis)){
+						displayTable($reporttable_analysis, $details, $rt_ids);
+					}
+					if(!empty($map_analysis)){
+						displayMap($map_analysis, $details, $map_ids);
+					}
+					if(!empty($chart_analysis)){
+						displayChart($chart_analysis, $details, $chart_ids);
+					}
+				?>
+			</div>
+		<?php
+	}else{
+		?>
+			<div id="bxslider" class="bxslider">
+				<?php
+					if(!empty($reporttable_analysis)){
+						displayTable($reporttable_analysis, $details, $rt_ids);
+					}
+					if(!empty($map_analysis)){
+						displayMap($map_analysis, $details, $map_ids);
+					}
+					if(!empty($chart_analysis)){
+						displayChart($chart_analysis, $details, $chart_ids);
+					}
+				?>
+			</div>
+		<?php
+	}
+	
 	$output = ob_get_contents(); // collect output
 	ob_end_clean(); // Turn off ouput buffer
   
