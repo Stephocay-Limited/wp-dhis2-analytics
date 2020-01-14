@@ -4,29 +4,27 @@
  * CSS for both Frontend+Backend.
  */
 
-.wp-block-dhis-block  {
-  background: $red;
-  border: 0.2rem solid $black;
-  color: $black;
-  margin: 0 auto;
-  max-width: 740px;
-  height: 350px;
-  padding: 2rem;
+.wp-block-dhis-block {
+	background: $red;
+	border: 0.2rem solid $black;
+	color: $black;
+	margin: 0 auto;
+	max-width: 740px;
+	height: 350px;
+	padding: 2rem;
 }
 
-.dhis2-slide{
-  width: 100%;
-  height: 450px;
+.dhis2-slider {
+	height: 440px;
 }
 
 .dhis2-map {
-  height: '75vh';
-  padding: '0 4px 4px'; 
-  overflow: 'auto';
+	height: '75vh';
+	padding: '0 4px 4px';
+	overflow: 'auto';
 }
 
-.bx-wrapper, .bx-viewport {
-  height: 450px !important; //provide height of slider
-}
-
-
+// .bx-wrapper,
+// .bx-viewport {
+// 	height: 450px !important; //provide height of slider
+// }
