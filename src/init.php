@@ -38,14 +38,14 @@ function dhis2_analytics_assets(){
 	);
 	wp_enqueue_style('ext-plugin-gray-css');
 
-	wp_register_style(
-		'bxslider-css', // Handle.
-		plugins_url( 'src/assets/bxslider/jquery.bxslider.min.css', dirname( __FILE__ ) ), // Block style CSS.
-		array( 'wp-editor','wp-blocks' ), // Dependency to include the CSS after it.
-		null // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.style.build.css' ) // Version: File modification time.
-	);
+	// wp_register_style(
+	// 	'slick-theme-css', // Handle.
+	// 	plugins_url( 'src/assets/slick/slick-theme.css', dirname( __FILE__ ) ), // Block style CSS.
+	// 	array('wp-blocks' ), // Dependency to include the CSS after it.
+	// 	null // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.style.build.css' ) // Version: File modification time.
+	// );
+	// wp_enqueue_style('slick-theme-css');
 
-	wp_enqueue_style('bxslider-css');
 
 	// Register block editor styles for backend.
 	wp_register_style(
@@ -66,6 +66,15 @@ function dhis2_analytics_assets(){
 		false // Load script in footer.
 	);
 	wp_enqueue_script('jquery');
+
+	// wp_register_script(
+	// 	'jquery-migrate', // Handle.
+	// 	plugins_url( 'src/assets/jquery-migrate-1.2.1.min.js', dirname( __FILE__ ) ), // JQuery.js: We register the block here.
+	// 	array( 'jquery' ), // Dependencies, defined above.
+	// 	false,
+	// 	false // Load script in footer.
+	// );
+	// wp_enqueue_script('jquery-migrate');
 
 	wp_register_script(
 		'ext-all-js',
@@ -143,8 +152,18 @@ function dhis2_analytics_assets(){
 		true,
 		false
 	);
-
 	wp_enqueue_script('bxslider-js');
+
+	//Nivo-SLider-JS
+	wp_register_script(
+		'slick-js',
+		plugins_url( 'src/assets/slick/slick.min.js', dirname( __FILE__ ) ),
+		['jquery','wp-blocks','wp-editor','ext-all-js'],
+		true,
+		false
+	);
+	wp_enqueue_script('slick-js');
+
 
 	  // WP Localized globals. Use dynamic PHP stuff in JavaScript via `osxGlobal` object.
 	$settings = get_option( 'dhis2_settings' );
@@ -185,7 +204,46 @@ function dhis2_analytics_style() {
 		plugins_url( 'src/assets/css/frontend/dhis2-analytics.css', dirname( __FILE__ ) ), 
 		false 
 	);
+
+	wp_enqueue_style( 'bxslider-css', 
+		plugins_url( 'src/assets/bxslider/jquery.bxslider.min.css', dirname( __FILE__ ) ), 
+		false 
+	);
+
+	wp_enqueue_style( 'slick-css', 
+		plugins_url( 'src/assets/slick/slick.css', dirname( __FILE__ ) ), 
+		false 
+	);
+
+	wp_enqueue_style( 'slick-theme-css', 
+		plugins_url( 'src/assets/slick/slick-theme.css', dirname( __FILE__ ) ), 
+		false 
+	);
 }
+
+
+// wp_register_style(
+// 	'bxslider-css', // Handle.
+// 	plugins_url( 'src/assets/bxslider/jquery.bxslider.min.css', dirname( __FILE__ ) ), // Block style CSS.
+// 	array( 'wp-editor','wp-blocks' ), // Dependency to include the CSS after it.
+// 	null // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.style.build.css' ) // Version: File modification time.
+// );
+
+// wp_enqueue_style('bxslider-css');
+
+//Nivo-Slider CSS and Nivo-Slider Theme
+//Nivo Theme [default|bar|dark|light]
+
+// wp_register_style(
+// 	'slick-css', // Handle.
+// 	plugins_url( 'src/assets/slick/slick.css', dirname( __FILE__ ) ), // Block style CSS.
+// 	array('wp-blocks' ), // Dependency to include the CSS after it.
+// 	null // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.style.build.css' ) // Version: File modification time.
+// );
+
+// wp_enqueue_style('slick-css');
+
+
 function dhis2_analytics_script() {
 	wp_enqueue_script( 'dhis2_analytics-frontend-js', 
 		plugins_url( 'src/assets/js/frontend/dhis2-analytics.js', dirname( __FILE__ ) ), 
@@ -219,40 +277,44 @@ function displayTable($objects, $details, $rt_ids){
 		// console.log(analysis_objects);
 		var rt_objects = JSON.parse(analysis_objects)
 		console.log(rt_objects);
-		Ext.onReady( function() {
-			Ext.Ajax.request({
-				url: dhis2.dhis2_uri + "/dhis-web-commons/security/login.action",
-				method: "POST",
-				headers: {
-				'Access-Control-Allow-Origin': '*'
-				},
-				cors: true,
-				xhrFields: {
-					withCredentials: true
-				},
-				useDefaultXhrHeader : false,
-				// withCredentials: true,
-				params: { j_username: dhis2.dhis2_username, j_password: dhis2.dhis2_password },
-				success: setRTLinks(rt_objects)
-			});
-		});
 
-		function setRTLinks(rt_objects) {
-			console.log(rt_objects);
-			reportTablePlugin.url = dhis2.dhis2_uri;
-			reportTablePlugin.username = dhis2.dhis2_username;
-			reportTablePlugin.password = dhis2.dhis2_password;
-			reportTablePlugin.loadingIndicator = true;
-			// var r1 = { el: uid, id: uid};
-			reportTablePlugin.load(rt_objects);
-		}
+		console.log(rt_objects);
+		reportTablePlugin.url = dhis2.dhis2_uri;
+		reportTablePlugin.username = dhis2.dhis2_username;
+		reportTablePlugin.password = dhis2.dhis2_password;
+		reportTablePlugin.loadingIndicator = true;
+		// var r1 = { el: uid, id: uid};
+		reportTablePlugin.load(rt_objects);
+
+		// Ext.onReady( function() {
+		// 	Ext.Ajax.request({
+		// 		url: dhis2.dhis2_uri + "/dhis-web-commons/security/login.action",
+		// 		method: "POST",
+		// 		headers: {
+		// 		'Access-Control-Allow-Origin': '*'
+		// 		},
+		// 		cors: true,
+		// 		xhrFields: {
+		// 			withCredentials: true
+		// 		},
+		// 		useDefaultXhrHeader : false,
+		// 		// withCredentials: true,
+		// 		params: { j_username: dhis2.dhis2_username, j_password: dhis2.dhis2_password },
+		// 		success: setRTLinks(rt_objects)
+		// 	});
+		// });
+
+		// function setRTLinks(rt_objects) {
+		// 	console.log(rt_objects);
+		// 	reportTablePlugin.url = dhis2.dhis2_uri;
+		// 	reportTablePlugin.username = dhis2.dhis2_username;
+		// 	reportTablePlugin.password = dhis2.dhis2_password;
+		// 	reportTablePlugin.loadingIndicator = true;
+		// 	// var r1 = { el: uid, id: uid};
+		// 	reportTablePlugin.load(rt_objects);
+		// }
 	</script>
 	<?php
-	foreach($rt_ids as $rt_id){
-		?>
-		<div id="<?php echo $rt_id; ?>" class="dhis2-slide"></div>
-		<?php
-	}
 }
 
 function displayMap($map_analysis, $details, $map_ids){
@@ -262,38 +324,40 @@ function displayMap($map_analysis, $details, $map_ids){
 		var dhis2 = <?php echo $details; ?>;
 		var map_objects = JSON.stringify(<?php echo $map_elements; ?>);
 		var mp_objects = JSON.parse(map_objects);
-		Ext.onReady( function() {
-			Ext.Ajax.request({
-				url: dhis2.dhis2_uri + "/dhis-web-commons/security/login.action",
-				method: "POST",
-				headers: {
-				'Access-Control-Allow-Origin': '*'
-				},
-				cors: true,
-				xhrFields: {
-					withCredentials: true
-				},
-				useDefaultXhrHeader : false,
-				withCredentials: true,
-				params: { j_username: dhis2.dhis2_username, j_password: dhis2.dhis2_password },
-				success: setMapLinks(mp_objects)
-			});
-		});
 
-		function setMapLinks(mp_objects){
-			mapPlugin.url = dhis2.dhis2_uri;
-			mapPlugin.username = dhis2.dhis2_username;
-			mapPlugin.password = dhis2.dhis2_password;
-			mapPlugin.loadingIndicator = true;
-			mapPlugin.load(mp_objects);
-		}
+		mapPlugin.url = dhis2.dhis2_uri;
+		mapPlugin.username = dhis2.dhis2_username;
+		mapPlugin.password = dhis2.dhis2_password;
+		mapPlugin.loadingIndicator = true;
+		mapPlugin.load(mp_objects);
+
+		// Ext.onReady( function() {
+		// 	Ext.Ajax.request({
+		// 		url: dhis2.dhis2_uri + "/dhis-web-commons/security/login.action",
+		// 		method: "POST",
+		// 		headers: {
+		// 		'Access-Control-Allow-Origin': '*'
+		// 		},
+		// 		cors: true,
+		// 		xhrFields: {
+		// 			withCredentials: true
+		// 		},
+		// 		useDefaultXhrHeader : false,
+		// 		withCredentials: true,
+		// 		params: { j_username: dhis2.dhis2_username, j_password: dhis2.dhis2_password },
+		// 		success: setMapLinks(mp_objects)
+		// 	});
+		// });
+
+		// function setMapLinks(mp_objects){
+		// 	mapPlugin.url = dhis2.dhis2_uri;
+		// 	mapPlugin.username = dhis2.dhis2_username;
+		// 	mapPlugin.password = dhis2.dhis2_password;
+		// 	mapPlugin.loadingIndicator = true;
+		// 	mapPlugin.load(mp_objects);
+		// }
 	</script>
 	<?php
-	foreach($map_ids as $map_id){
-		?>
-		<div id="<?php echo $map_id; ?>" class="dhis2-slide dhis2-map"></div>
-		<?php
-	}
 };
 		
 
@@ -304,47 +368,68 @@ function displayChart($chart_analysis, $details, $chart_ids){
 		var dhis2 = <?php echo $details; ?>;
 		var chart_objects = JSON.stringify(<?php echo $elements; ?>);
 		var ct_objects = JSON.parse(chart_objects);
-		// console.log(objects);
-		Ext.onReady( function() {
-			Ext.Ajax.request({
-				url: dhis2.dhis2_uri + "/dhis-web-commons/security/login.action",
-				method: "POST",
-				headers: {
-				'Access-Control-Allow-Origin': '*'
-				},
-				cors: true,
-				xhrFields: {
-					withCredentials: true
-				},
-				useDefaultXhrHeader : false,
-				// withCredentials: true,
-				params: { j_username: dhis2.dhis2_username, j_password: dhis2.dhis2_password },
-				success: setChartLinks(ct_objects)
-			});
-		});
+		console.log(ct_objects);
+		chartPlugin.url = dhis2.dhis2_uri;
+		chartPlugin.username = dhis2.dhis2_username;
+		chartPlugin.password = dhis2.dhis2_password;
+		chartPlugin.loadingIndicator = true;
+		chartPlugin.load(ct_objects);
 
-		function setChartLinks(ct_objects){
-			chartPlugin.url = dhis2.dhis2_uri;
-			chartPlugin.username = dhis2.dhis2_username;
-			chartPlugin.password = dhis2.dhis2_password;
-			chartPlugin.loadingIndicator = true;
-			chartPlugin.load(ct_objects);
+		// Ext.onReady( function() {
+		// 	Ext.Ajax.request({
+		// 		url: dhis2.dhis2_uri + "/dhis-web-commons/security/login.action",
+		// 		method: "POST",
+		// 		headers: {
+		// 		'Access-Control-Allow-Origin': '*'
+		// 		},
+		// 		cors: true,
+		// 		xhrFields: {
+		// 			withCredentials: true
+		// 		},
+		// 		useDefaultXhrHeader : false,
+		// 		// withCredentials: true,
+		// 		params: { j_username: dhis2.dhis2_username, j_password: dhis2.dhis2_password },
+		// 		success: setChartLinks(ct_objects)
+		// 	});
+		// });
 
-		}
+		// function setChartLinks(ct_objects){
+		// 	chartPlugin.url = dhis2.dhis2_uri;
+		// 	chartPlugin.username = dhis2.dhis2_username;
+		// 	chartPlugin.password = dhis2.dhis2_password;
+		// 	chartPlugin.loadingIndicator = true;
+		// 	chartPlugin.load(ct_objects);
+		// }
 	</script>
 	<?php
-	foreach($chart_ids as $chart_id){
-		?>
-		<div id="<?php echo $chart_id; ?>" class="dhis2-slide"></div>
-		<?php
-	}
 };
+
+function gen_uuid() {
+    return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+        // 32 bits for "time_low"
+        mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+
+        // 16 bits for "time_mid"
+        mt_rand( 0, 0xffff ),
+
+        // 16 bits for "time_hi_and_version",
+        // four most significant bits holds version number 4
+        mt_rand( 0, 0x0fff ) | 0x4000,
+
+        // 16 bits, 8 bits for "clk_seq_hi_res",
+        // 8 bits for "clk_seq_low",
+        // two most significant bits holds zero and one for variant DCE1.1
+        mt_rand( 0, 0x3fff ) | 0x8000,
+
+        // 48 bits for "node"
+        mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+    );
+}
 
 function render_dynamic_block($attributes) {
 	ob_start();
 	$dashboard_items = $attributes['dashboard_items'];
 	// print_r($dashboard_items);
-	print_r($attributes);
 	$settings = get_option( 'dhis2_settings' );
 	$details = json_encode($settings);
 	$base=$settings['dhis2_uri'];
@@ -361,36 +446,39 @@ function render_dynamic_block($attributes) {
 	$mp = 1;
 	$ct = 1;
 	if(is_array($dashboard_items) && !empty($dashboard_items)){
+		// print_r($dashboard_items);
 		foreach ($dashboard_items as $dashboard_item) {
+			
 			$type = $dashboard_item['type'];
+			$uuid = gen_uuid(); 
 			// echo $type;
 			switch($type){
 				case "REPORT_TABLE":
 				$rt_id = $dashboard_item['reportTable']['id'];
-				$rt_element = array ("el"=>"reportTable".$rt, "id"=>$rt_id);
+				$rt_element = array ("el"=>"reportTable_".$uuid, "id"=>$rt_id);
 				array_push($reporttable_analysis, $rt_element);
 				// print_r($reporttable_analysis);
-				if(!in_array("reportTable".$rt, $rt_ids)){
-					array_push($rt_ids, "reportTable".$rt);
+				if(!in_array("reportTable_".$uuid, $rt_ids)){
+					array_push($rt_ids, "reportTable_".$uuid);
 				}
 				$rt++;
 				break;
 				case 'MAP':
 				$map_id = $dashboard_item['map']['id'];
-				$map_element = array ("url"=>$base,"el"=>"map".$mp, "id"=>$map_id);
+				$map_element = array ("url"=>$base,"el"=>"map_".$uuid, "id"=>$map_id);
 				array_push($map_analysis, $map_element);
-				if(!in_array("map".$mp, $map_ids)){
-					array_push($map_ids, "map".$mp);
+				if(!in_array("map_".$uuid, $map_ids)){
+					array_push($map_ids, "map_".$uuid);
 				}
 				$mp++;
 				break;
 				case 'CHART':
 				$chart_id = $dashboard_item['chart']['id'];
-				$ct_element = array ("el"=>"chart".$ct, "id"=>$chart_id);
+				$ct_element = array ("el"=>"chart_".$uuid, "id"=>$chart_id);
 				array_push($chart_analysis, $ct_element);
 	
-				if(!in_array("chart".$ct, $chart_ids)){
-					array_push($chart_ids, "chart".$ct);
+				if(!in_array("chart_".$uuid, $chart_ids)){
+					array_push($chart_ids, "chart_".$uuid);
 				}
 				$ct++;
 				break;
@@ -402,40 +490,67 @@ function render_dynamic_block($attributes) {
 		}
 	}
 
+	if(!empty($reporttable_analysis)){
+		displayTable($reporttable_analysis, $details, $rt_ids);
+	}
+	if(!empty($map_analysis)){
+		displayMap($map_analysis, $details, $map_ids);
+	}
+	if(!empty($chart_analysis)){
+		displayChart($chart_analysis, $details, $chart_ids);
+	}
+
 	$displayItems = $attributes['displayItem'];
+	
+
+	// print_r($all_ids);
 	if($displayItems == "single"){
 		$id = $attributes['dashboard_items'][0]['data']['id'];
-		// $id = "HSHH";
 		?>
 			<div id="<?php echo $id; ?>" class="dhis2-analytics-single">
-			<?php
-					if(!empty($reporttable_analysis)){
-						displayTable($reporttable_analysis, $details, $rt_ids);
-					}
-					if(!empty($map_analysis)){
-						displayMap($map_analysis, $details, $map_ids);
-					}
-					if(!empty($chart_analysis)){
-						displayChart($chart_analysis, $details, $chart_ids);
+				<?php 				
+					$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
+					if (!empty($all_ids)){
+						foreach($all_ids as $id){
+							?>
+								<div id="<?php echo $id; ?>" class="dhis2-analytic-item"></div>
+							<?php
+						}
 					}
 				?>
 			</div>
 		<?php
 	}else{
 		?>
-			<div id="bxslider" class="bxslider">
-				<?php
-					if(!empty($reporttable_analysis)){
-						displayTable($reporttable_analysis, $details, $rt_ids);
-					}
-					if(!empty($map_analysis)){
-						displayMap($map_analysis, $details, $map_ids);
-					}
-					if(!empty($chart_analysis)){
-						displayChart($chart_analysis, $details, $chart_ids);
+			<div class="analytics-slider">
+				<?php 
+					
+					$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
+					if (!empty($all_ids)){
+						foreach($all_ids as $id){
+							?>
+								<div id="<?php echo $id; ?>" class="dhis2-slide"></div>
+							<?php
+						}
 					}
 				?>
 			</div>
+			<!-- <script>
+				// $(document).ready(function(){
+				// 	$('.analytics-slider').bxSlider({
+				// 		mode: 'fade',
+				// 		pause: 20000,
+				// 		responsive: true,
+				// 		captions: true,
+				// 		slideSelector: 'div.dhis2-slide',
+				// 		pager: false,
+				// 		auto: true,
+				// 		autoDirection: true,
+				// 		autoHover: true,
+				// 		keyboardEnabled: true
+				// 	});
+				// });
+			</script> -->
 		<?php
 	}
 	

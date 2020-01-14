@@ -1,15 +1,30 @@
-.bxslider{
-    width: 100%;
-    border: 1px solid #0ccc82;
-    overflow: hidden;
-    height: 500px;
-}
-
 .bx-wrapper {
-    height: 500px !important;
-    overflow: auto; 
+    height: 450px !important;
+    /* overflow: auto;  */
 }
 
 .bx-viewport{
-    height: 100%;
+    height: 450px;
 }
+
+.analytics-slider{
+    width: 100%;
+    border: 2px solid red;
+    /* width:90%; */
+    margin:0px auto;
+    height: 440px;
+    overflow: hidden;
+}
+
+
+
+.slick-track{
+    transform: translate3d(0);
+}
+
+.dhis2-analytics-single{
+    border: 1px solid blueviolet;
+    height: 450px;
+    width: 100%;
+}
+

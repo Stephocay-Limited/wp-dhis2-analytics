@@ -1,5 +1,5 @@
-$(document).ready(function(){
-    $('.bxslider').bxSlider({
+$(window).on('load', function(){
+    $('.analytics-slider').bxSlider({
         mode: 'fade',
         pause: 20000,
         responsive: true,
@@ -12,3 +12,19 @@ $(document).ready(function(){
         keyboardEnabled: true
     });
 });
+
+// $(window).on('load', function() {
+//     $('.slider').bxSlider();
+//   })
+
+// $(document).ready(function() {
+//     // alert("Loaded");
+//     $('.analytics-slider').slick({
+//         adaptiveHeight: true,
+//         slidesToShow: 1,
+//         dots: false,
+//         prevArrow: false,
+//         nextArrow: false,
+//         centreMode: true,
+//     });
+// });
