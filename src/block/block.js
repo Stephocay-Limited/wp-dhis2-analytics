@@ -9,7 +9,7 @@
 import './editor.scss';
 import './style.scss';
 import axios from 'axios';
-import { BorderAll, Help, Public, BarChart} from '@material-ui/icons';
+import { BorderAll, Help, Public, BarChart } from '@material-ui/icons';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
@@ -198,17 +198,17 @@ registerBlockType('osx/dhis2-analytics', {
 			let listDashboards = null;
 			if (dashboards) {
 				listDashboards = dashboards.filter(d => d.dashboardItems.length > 0).map((dashboard) =>
-					<ExpansionPanel expanded={this.state.expanded === dashboard.id} onChange={this.handleChange(dashboard.id)}>
+					<ExpansionPanel key={dashboard.id} expanded={this.state.expanded === dashboard.id} onChange={this.handleChange(dashboard.id)}>
 						<ExpansionPanelSummary
 							expandIcon={<ExpandMoreIcon />}
 							aria-controls="panel1bh-content"
 							id="panel1bh-header"
 						>
-							<Typography className="dashboard-name" style={{marginTop:0, marginBottom:0}}>{dashboard.name}</Typography>
+							<Typography className="dashboard-name" style={{ marginTop: 0, marginBottom: 0 }}>{dashboard.name}</Typography>
 						</ExpansionPanelSummary>
 						<ExpansionPanelDetails>
 
-							<ul className="dashboard-items" style={{margin:0, padding:0}}>
+							<ul className="dashboard-items" style={{ margin: 0, padding: 0 }}>
 								{
 									dashboard.dashboardItems.map((dashboardItem) => {
 										const type = dashboardItem.type;
@@ -247,7 +247,7 @@ registerBlockType('osx/dhis2-analytics', {
 			return (
 				<div>
 					<h4 className="dhis2-header">DHIS2 Dashboard Block Settings</h4>
-					<ul className="analytics-dashboards" style={{margin:0, padding:0}}>
+					<ul className="analytics-dashboards" style={{ margin: 0, padding: 0 }}>
 						{
 							(dashboards) ? listDashboards : <CircularProgress />
 						}
