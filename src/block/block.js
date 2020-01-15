@@ -88,12 +88,14 @@ registerBlockType('osx/dhis2-analytics', {
 		},
 		displayItem: {
 			type: 'string',
+			default: 'single',
 		},
 		displayMode: {
 			type: 'string',
 		},
 		displaySize: {
 			type: 'string',
+			default: 'fullwidth',
 		},
 		displayWidth: {
 			type: 'string',
@@ -105,18 +107,6 @@ registerBlockType('osx/dhis2-analytics', {
 			type: 'boolean',
 		},
 	},
-
-	/**
-	 * The edit function describes the structure of your block in the context of the editor.
-	 * This represents what the editor will render when the block is used.
-	 *
-	 * The "edit" property must be a valid function.
-	 *
-	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
-	 *
-	 * @param {Object} props Props.
-	 * @returns {Mixed} JSX Component.
-	 */
 	edit: class extends Component {
 		constructor() {
 			super(...arguments);
@@ -133,6 +123,7 @@ registerBlockType('osx/dhis2-analytics', {
 
 		onChangeDisplayItem = (newValue) => {
 			this.props.setAttributes({ displayItem: newValue });
+			this.props.setAttributes({ dashboard_items: [] });
 		};
 
 		onChangeDisplayMode = (newValue) => {
@@ -157,8 +148,8 @@ registerBlockType('osx/dhis2-analytics', {
 
 		handleChange = panel => (event, isExpanded) => {
 			this.setState({
-				expanded: isExpanded ? panel : false
-			})
+				expanded: isExpanded ? panel : false,
+			});
 		};
 
 		componentDidMount() {
@@ -178,16 +169,23 @@ registerBlockType('osx/dhis2-analytics', {
 		}
 		updateSelectedItems = (item) => (e) => {
 			const checked = e.target.checked;
-			let { attributes: { dashboard_items } } = this.props;
+			let { attributes: { dashboard_items, displayItem } } = this.props;
 			if (checked) {
-				if (dashboard_items.indexOf(item) === -1) {
-					dashboard_items = [...dashboard_items, item];
+				if (displayItem === 'single') {
+					if (dashboard_items.indexOf(item) === -1) {
+						dashboard_items = [item];
+					}
+				} else if (displayItem === 'multiple') {
+					if (dashboard_items.indexOf(item) === -1) {
+						dashboard_items = [...dashboard_items, item];
+					}
 				}
 			} else {
 				dashboard_items = dashboard_items.filter(i => {
 					return i.data.id !== item.data.id;
 				});
 			}
+			console.log(dashboard_items);
 			this.props.setAttributes({ dashboard_items });
 		};
 
@@ -261,42 +259,44 @@ registerBlockType('osx/dhis2-analytics', {
 								label="Display Items"
 								value={displayItem}
 								options={[
-									{ value: '', label: 'Select Options' },
 									{ value: 'single', label: 'Single Item' },
-									{ value: 'multiple', label: 'Multiple Items' }
+									{ value: 'multiple', label: 'Multiple Items' },
 								]}
 								onChange={this.onChangeDisplayItem} >
 							</SelectControl>
-							<SelectControl
+							{displayItem === 'multiple' ? <SelectControl
 								label="Display Mode"
 								value={displayMode}
 								options={[
 									{ value: '', label: 'Select Options' },
 									{ value: 'slideshow', label: 'Slideshow Display' },
 									{ value: 'stack', label: 'Stacked Display' },
-									{ value: 'report', label: 'Report Display' }
+									{ value: 'report', label: 'Report Display' },
 								]}
 								onChange={this.onChangeDisplayMode} >
-							</SelectControl>
+							</SelectControl> : null}
 							<SelectControl
 								label="Display Size"
 								value={displaySize}
 								options={[
-									{ value: '', label: 'Select Options' },
 									{ value: 'fullwidth', label: 'Fullwidth' },
-									{ value: 'custom', label: 'Custom size' }
+									{ value: 'custom', label: 'Custom size' },
 								]}
 								onChange={this.onChangeDisplaySize} >
 							</SelectControl>
-							<TextControl label="Custom width (%)" value={displayWidth} onChange={this.onChangeDisplayWidth}></TextControl>
-							<TextControl label="Custom Length (%)" value={displayLength} onChange={this.onChangeDisplayLength}></TextControl>
+							{displaySize === 'custom' ? <div>
+								<TextControl label="Custom width (px)" value={displayWidth} onChange={this.onChangeDisplayWidth}></TextControl>
+								<TextControl label="Custom Length (px)" value={displayLength} onChange={this.onChangeDisplayLength}></TextControl>
+							</div> : null}
 							<ToggleControl label="Enable Captions" checked={enableCaption} onChange={this.onChangeEnableCaption}></ToggleControl>
 							{/* Panel items goes here */}
 						</PanelBody>
 						<PanelBody
 							title={__('Slideshow settings')}
 							initialOpen={false}
-						></PanelBody>
+						>
+
+						</PanelBody>
 					</InspectorControls>
 				</div>
 			);

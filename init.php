@@ -414,6 +414,7 @@ function render_dynamic_block($attributes)
 
 	if ($displayItems == "single") {
 		$id = $attributes['dashboard_items'][0]['data']['id'];
+		print_r($displayItems);
 	?>
 		<div id="<?php echo $id; ?>" class="dhis2-analytics-single">
 			<?php
@@ -421,7 +422,7 @@ function render_dynamic_block($attributes)
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
 			?>
-					<div id="<?php echo $id; ?>" class="dhis2-analytic-item"></div>
+					<div id="<?php echo $id; ?>" class="dhis2-analytic-item" style="width:500px;height:500px;background:green"></div>
 			<?php
 				}
 			}
@@ -429,6 +430,7 @@ function render_dynamic_block($attributes)
 		</div>
 	<?php
 	} else {
+		print_r($displayItems);
 	?>
 		<div class="analytics-slider">
 			<?php
@@ -449,6 +451,6 @@ function render_dynamic_block($attributes)
 	return $output; // Print output
 }
 
-include __DIR__ . '/lib/settings.php';
+include __DIR__ . 'settings.php';
 //Amin Settings
 register_activation_hook(__FILE__, 'get_dhis2_settings');
