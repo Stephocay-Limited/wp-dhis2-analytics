@@ -41,15 +41,6 @@ function dhis2_analytics_assets()
 	);
 	wp_enqueue_style('ext-plugin-gray-css');
 
-	// wp_register_style(
-	// 	'slick-theme-css', // Handle.
-	// 	plugins_url( 'src/assets/slick/slick-theme.css', dirname( __FILE__ ) ), // Block style CSS.
-	// 	array('wp-blocks' ), // Dependency to include the CSS after it.
-	// 	null // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.style.build.css' ) // Version: File modification time.
-	// );
-	// wp_enqueue_style('slick-theme-css');
-
-
 	// Register block editor styles for backend.
 	wp_register_style(
 		'dhis2_analytics-editor-css', // Handle.
@@ -69,15 +60,6 @@ function dhis2_analytics_assets()
 		false // Load script in footer.
 	);
 	wp_enqueue_script('jquery');
-
-	// wp_register_script(
-	// 	'jquery-migrate', // Handle.
-	// 	plugins_url( 'src/assets/jquery-migrate-1.2.1.min.js', dirname( __FILE__ ) ), // JQuery.js: We register the block here.
-	// 	array( 'jquery' ), // Dependencies, defined above.
-	// 	false,
-	// 	false // Load script in footer.
-	// );
-	// wp_enqueue_script('jquery-migrate');
 
 	wp_register_script(
 		'ext-all-js',
@@ -157,16 +139,6 @@ function dhis2_analytics_assets()
 	);
 	wp_enqueue_script('bxslider-js');
 
-	//Nivo-SLider-JS
-	wp_register_script(
-		'slick-js',
-		plugins_url('src/assets/slick/slick.min.js', dirname(__FILE__)),
-		['jquery', 'wp-blocks', 'wp-editor', 'ext-all-js'],
-		true,
-		false
-	);
-	wp_enqueue_script('slick-js');
-
 
 	// WP Localized globals. Use dynamic PHP stuff in JavaScript via `osxGlobal` object.
 	$settings = get_option('dhis2_settings');
@@ -214,18 +186,6 @@ function dhis2_analytics_style()
 	wp_enqueue_style(
 		'bxslider-css',
 		plugins_url('src/assets/bxslider/jquery.bxslider.min.css', dirname(__FILE__)),
-		false
-	);
-
-	wp_enqueue_style(
-		'slick-css',
-		plugins_url('src/assets/slick/slick.css', dirname(__FILE__)),
-		false
-	);
-
-	wp_enqueue_style(
-		'slick-theme-css',
-		plugins_url('src/assets/slick/slick-theme.css', dirname(__FILE__)),
 		false
 	);
 }
@@ -282,11 +242,40 @@ function displayMap($map_analysis, $details)
 		var dhis2 = <?php echo $details; ?>;
 		var map_objects = JSON.stringify(<?php echo $map_elements; ?>);
 		var mp_objects = JSON.parse(map_objects);
-		mapPlugin.url = dhis2.dhis2_uri;
-		mapPlugin.username = dhis2.dhis2_username;
-		mapPlugin.password = dhis2.dhis2_password;
-		mapPlugin.loadingIndicator = true;
-		mapPlugin.load(mp_objects);
+
+		// mapPlugin.url = dhis2.dhis2_uri;
+		// mapPlugin.username = dhis2.dhis2_username;
+		// mapPlugin.password = dhis2.dhis2_password;
+		// mapPlugin.loadingIndicator = true;
+		// mapPlugin.load(mp_objects);
+
+		Ext.onReady( function() {
+			Ext.Ajax.request({
+				url: dhis2.dhis2_uri + "/dhis-web-commons/security/login.action",
+				method: "POST",
+				// headers: {
+				// 'Access-Control-Allow-Origin': '*'
+				// },
+				// cors: true,
+				xhrFields: {
+					withCredentials: true
+				},
+				useDefaultXhrHeader : false,
+				// withCredentials: true,
+				params: { j_username: dhis2.dhis2_username, j_password: dhis2.dhis2_password },
+				success: setLinks
+			});
+		});
+		
+		function setLinks() {
+			// DHIS.getMap(mp_objects);
+			mapPlugin.url = dhis2.dhis2_uri;
+			mapPlugin.username = dhis2.dhis2_username;
+			mapPlugin.password = dhis2.dhis2_password;
+			mapPlugin.loadingIndicator = true;
+			mapPlugin.load(mp_objects);
+		}
+		
 	</script>
 <?php
 };
@@ -412,16 +401,18 @@ function render_dynamic_block($attributes)
 
 	$displayItems = $attributes['displayItem'];
 
+	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
+
 	if ($displayItems == "single") {
 		$id = $attributes['dashboard_items'][0]['data']['id'];
 	?>
 		<div id="<?php echo $id; ?>" class="dhis2-analytics-single">
 			<?php
-			$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
+					$map_class = (explode("_",$id)[0] == "map") ? "dhis2-map" : "";
 			?>
-					<div id="<?php echo $id; ?>" class="dhis2-analytic-item"></div>
+					<div id="<?php echo $id; ?>" class="dhis2-analytic-item <?php echo $map_class; ?>"></div>
 			<?php
 				}
 			}
@@ -432,12 +423,13 @@ function render_dynamic_block($attributes)
 	?>
 		<div class="analytics-slider">
 			<?php
-			$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
+			// $all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
-			?>
-					<div id=<?php echo $id; ?> class="dhis2-slide"></div>
-			<?php
+					$map_class = (explode("_",$id)[0] == "map") ? "dhis2-map" : "";
+				?>
+					<div id=<?php echo $id; ?> class="dhis2-slide <?php echo $map_class; ?>"></div>
+				<?php
 				}
 			}
 			?>

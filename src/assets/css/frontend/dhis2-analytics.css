@@ -7,24 +7,17 @@
 	height: 450px;
 }
 
-.analytics-slider {
-	/* width: 100%;
-	border: 2px solid red;
-	margin: 0px auto;
-	height: 100%;
-	overflow: hidden;
-	background: red; */
-}
 .dhis2-slide {
-	height: 440px;
+    height: 440px;
+    width: 100%;
 }
 
-.slick-track {
+/* .slick-track {
 	transform: translate3d(0);
-}
+} */
 
 .dhis2-analytics-single {
-	border: 1px solid blueviolet;
+	/* border: 1px solid blueviolet; */
 	height: 450px;
 	width: 100%;
 }
