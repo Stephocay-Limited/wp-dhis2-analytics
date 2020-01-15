@@ -451,6 +451,6 @@ function render_dynamic_block($attributes)
 	return $output; // Print output
 }
 
-include __DIR__ . 'settings.php';
+include __DIR__ . '/lib/settings.php';
 //Amin Settings
 register_activation_hook(__FILE__, 'get_dhis2_settings');

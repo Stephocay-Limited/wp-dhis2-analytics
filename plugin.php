@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: DHIS2 Analytics
  * Plugin URI: https://stephocay.com/products/dhis2-analytics/
@@ -14,11 +13,11 @@
  */
 
 // Exit if accessed directly.
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
  * Block Initializer.
  */
-require_once plugin_dir_path(__FILE__) . 'init.php';
+require_once plugin_dir_path( __FILE__ ) . 'src/init.php';
