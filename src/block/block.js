@@ -9,19 +9,22 @@
 import './editor.scss';
 import './style.scss';
 import axios from 'axios';
-import { BorderAll, Help, Public, BarChart } from '@material-ui/icons';
+import { BorderAll, Help, Public, BarChart , Layers} from '@material-ui/icons';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+// import logo from '../assets/img/dhis2_short.png';
 
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
 const { InspectorControls } = wp.editor;
 const { Component } = wp.element;
 const { PanelBody, SelectControl, TextControl, ToggleControl } = wp.components;
+
+// const logo = require('../assets/img/dhis2_short.png');
 
 // eslint-disable-next-line no-undef
 const dhis_settings = osxGlobal.dhis2setting;
@@ -185,7 +188,7 @@ registerBlockType('osx/dhis2-analytics', {
 					return i.data.id !== item.data.id;
 				});
 			}
-			console.log(dashboard_items);
+			// console.log(dashboard_items);
 			this.props.setAttributes({ dashboard_items });
 		};
 
@@ -244,7 +247,7 @@ registerBlockType('osx/dhis2-analytics', {
 			}
 			return (
 				<div>
-					<h4 className="dhis2-header">DHIS2 Dashboard Block Settings</h4>
+					<h4 className="dhis2-header"  style={{marginTop:'2.33em', marginBottom: '1.33em', lineHeight: '1.5' }}> <div class="block-logo" ></div>DHIS2 Analytics Block</h4>
 					<ul className="analytics-dashboards" style={{ margin: 0, padding: 0 }}>
 						{
 							(dashboards) ? listDashboards : <CircularProgress />

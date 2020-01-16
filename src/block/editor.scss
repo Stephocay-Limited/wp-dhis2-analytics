@@ -256,3 +256,15 @@ input[type=checkbox], input[type=radio] {
   margin: 0;
   padding: 0;
 }
+
+.block-logo{
+  height: 60px;
+  width: 60px;
+  // border: 1px solid red;
+  float: left;
+  margin-right: 0px;
+  background-image: url(../src/assets/img/dhis2_short.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  margin-top: -15px;
+}

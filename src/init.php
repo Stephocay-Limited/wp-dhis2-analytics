@@ -41,15 +41,6 @@ function dhis2_analytics_assets()
 	);
 	wp_enqueue_style('ext-plugin-gray-css');
 
-	// wp_register_style(
-	// 	'slick-theme-css', // Handle.
-	// 	plugins_url( 'src/assets/slick/slick-theme.css', dirname( __FILE__ ) ), // Block style CSS.
-	// 	array('wp-blocks' ), // Dependency to include the CSS after it.
-	// 	null // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.style.build.css' ) // Version: File modification time.
-	// );
-	// wp_enqueue_style('slick-theme-css');
-
-
 	// Register block editor styles for backend.
 	wp_register_style(
 		'dhis2_analytics-editor-css', // Handle.
@@ -69,15 +60,6 @@ function dhis2_analytics_assets()
 		false // Load script in footer.
 	);
 	wp_enqueue_script('jquery');
-
-	// wp_register_script(
-	// 	'jquery-migrate', // Handle.
-	// 	plugins_url( 'src/assets/jquery-migrate-1.2.1.min.js', dirname( __FILE__ ) ), // JQuery.js: We register the block here.
-	// 	array( 'jquery' ), // Dependencies, defined above.
-	// 	false,
-	// 	false // Load script in footer.
-	// );
-	// wp_enqueue_script('jquery-migrate');
 
 	wp_register_script(
 		'ext-all-js',
@@ -157,17 +139,6 @@ function dhis2_analytics_assets()
 	);
 	wp_enqueue_script('bxslider-js');
 
-	//Nivo-SLider-JS
-	wp_register_script(
-		'slick-js',
-		plugins_url('src/assets/slick/slick.min.js', dirname(__FILE__)),
-		['jquery', 'wp-blocks', 'wp-editor', 'ext-all-js'],
-		true,
-		false
-	);
-	wp_enqueue_script('slick-js');
-
-
 	// WP Localized globals. Use dynamic PHP stuff in JavaScript via `osxGlobal` object.
 	$settings = get_option('dhis2_settings');
 	wp_localize_script(
@@ -214,18 +185,6 @@ function dhis2_analytics_style()
 	wp_enqueue_style(
 		'bxslider-css',
 		plugins_url('src/assets/bxslider/jquery.bxslider.min.css', dirname(__FILE__)),
-		false
-	);
-
-	wp_enqueue_style(
-		'slick-css',
-		plugins_url('src/assets/slick/slick.css', dirname(__FILE__)),
-		false
-	);
-
-	wp_enqueue_style(
-		'slick-theme-css',
-		plugins_url('src/assets/slick/slick-theme.css', dirname(__FILE__)),
 		false
 	);
 }
@@ -411,14 +370,12 @@ function render_dynamic_block($attributes)
 	}
 
 	$displayItems = $attributes['displayItem'];
-
+	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
 	if ($displayItems == "single") {
 		$id = $attributes['dashboard_items'][0]['data']['id'];
-		print_r($displayItems);
 	?>
 		<div id="<?php echo $id; ?>" class="dhis2-analytics-single">
 			<?php
-			$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
 			?>
@@ -430,11 +387,11 @@ function render_dynamic_block($attributes)
 		</div>
 	<?php
 	} else {
-		print_r($displayItems);
+		// print_r($displayItems);
 	?>
 		<div class="analytics-slider">
 			<?php
-			$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
+			// $all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
 			?>
