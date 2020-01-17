@@ -212,26 +212,26 @@ function register_dynamic_block()
 	// Hook server side rendering into render callback
 	// Make sure name matches registerBlockType in ./index.js
 	register_block_type('osx/dhis2-analytics', array(
-		'attributes'=>array(
-			'displaySize'=> array(
-				'type'=> 'string',
-				'default'=> 'fullwidth',
+		'attributes' => array(
+			'displaySize' => array(
+				'type' => 'string',
+				'default' => 'fullwidth',
 			),
-			'displayMode'=> array(
-				'type'=> 'string',
-				'default'=> 'slideshow',
+			'displayMode' => array(
+				'type' => 'string',
+				'default' => 'slideshow',
 			),
-			'displayItem'=> array(
-				'type'=> 'string',
-				'default'=> 'single',
+			'displayItem' => array(
+				'type' => 'string',
+				'default' => 'single',
 			),
-			'enableCaption'=> array(
-				'type'=> 'boolean',
-				'default'=> false,
+			'enableCaption' => array(
+				'type' => 'boolean',
+				'default' => false,
 			),
-			'slideshowSettings'=> array(
-				'type'=> 'array',
-				'default'=> array(),
+			'slideshowSettings' => array(
+				'type' => 'object',
+				'default' => array(),
 			)
 		),
 		'render_callback' => 'render_dynamic_block'
@@ -244,8 +244,7 @@ function displayTable($objects, $details)
 ?>
 	<script>
 		var dhis2 = <?php echo $details; ?>;
-		var analysis_objects = JSON.stringify(<?php echo $elements; ?>);
-		var rt_objects = JSON.parse(analysis_objects)
+		var rt_objects = <?php echo $elements; ?>;
 		reportTablePlugin.url = dhis2.dhis2_uri;
 		reportTablePlugin.username = dhis2.dhis2_username;
 		reportTablePlugin.password = dhis2.dhis2_password;
@@ -261,8 +260,7 @@ function displayMap($map_analysis, $details)
 ?>
 	<script>
 		var dhis2 = <?php echo $details; ?>;
-		var map_objects = JSON.stringify(<?php echo $map_elements; ?>);
-		var mp_objects = JSON.parse(map_objects);
+		var mp_objects = <?php echo $map_elements; ?>;
 		mapPlugin.url = dhis2.dhis2_uri;
 		mapPlugin.username = dhis2.dhis2_username;
 		mapPlugin.password = dhis2.dhis2_password;
@@ -279,8 +277,8 @@ function displayChart($chart_analysis, $details)
 ?>
 	<script>
 		var dhis2 = <?php echo $details; ?>;
-		var chart_objects = JSON.stringify(<?php echo $elements; ?>);
-		var ct_objects = JSON.parse(chart_objects);
+		var ct_objects = <?php echo $elements; ?>;
+		// var ct_objects = JSON.parse(chart_objects);
 		chartPlugin.url = dhis2.dhis2_uri;
 		chartPlugin.username = dhis2.dhis2_username;
 		chartPlugin.password = dhis2.dhis2_password;
@@ -319,7 +317,6 @@ function gen_uuid()
 
 function render_dynamic_block($attributes)
 {
-	// print_r($attributes);
 	$displayItems = $attributes['displayItem'];
 	$displayMode = $attributes['displayMode'];
 	$displaySize = $attributes['displaySize'];
@@ -332,10 +329,9 @@ function render_dynamic_block($attributes)
 	};
 
 	$height_width_style = 'width:' . $width . ';height:' . $height . ';';
-
+	$slideshowSettings = json_encode($attributes['slideshowSettings']);
 	ob_start();
 	$dashboard_items = $attributes['dashboard_items'];
-	// print_r($dashboard_items);
 	$settings = get_option('dhis2_settings');
 	$details = json_encode($settings);
 	$base = $settings['dhis2_uri'];
@@ -412,30 +408,38 @@ function render_dynamic_block($attributes)
 	<?php
 	} else {
 	?>
-		<div class=<?php echo $displayMode; ?> style="height:<?php echo $height; ?>">
+		<div class=<?php echo $displayMode; ?> style="height:<?php echo $height; ?>;width:450px;">
 			<?php
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
 			?>
-					<div id=<?php echo $id; ?> style="height:<?php echo $height; ?>;" class="dhis2-slide"></div>
+					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="height:<?php echo $height; ?>;" class="dhis2-slide"></div>
 				<?php
 				}
 			}
 			if (strcmp($displayMode, 'slideshow') == 0) {
 				?>
 				<script>
-					$('.slideshow').bxSlider({
+					var x = <?php echo $slideshowSettings; ?>;
+					var defaultConfig = {
 						mode: 'fade',
 						pause: 20000,
 						responsive: true,
 						captions: true,
-						slideSelector: '.dhis2-slide',
+						slideSelector: 'div.dhis2-slide',
 						pager: false,
 						auto: true,
 						autoDirection: true,
 						autoHover: true,
 						keyboardEnabled: true,
-					});
+						captions: true,
+					}
+					// for (var prop in x) {
+					// 	defaultConfig[prop] = x[prop];
+					// }
+					console.log(JSON.stringify(defaultConfig, null, 2));
+
+					$('.slideshow').bxSlider(defaultConfig);
 				</script>
 			<?php
 			} else if (strcmp($displayMode, 'report') == 0) {
