@@ -9,7 +9,7 @@
 import './editor.scss';
 import './style.scss';
 import axios from 'axios';
-import { BorderAll, Help, Public, BarChart , Layers} from '@material-ui/icons';
+import { BorderAll, Help, Public, BarChart } from '@material-ui/icons';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
@@ -95,6 +95,7 @@ registerBlockType('osx/dhis2-analytics', {
 		},
 		displayMode: {
 			type: 'string',
+			default: 'slideshow',
 		},
 		displaySize: {
 			type: 'string',
@@ -103,11 +104,16 @@ registerBlockType('osx/dhis2-analytics', {
 		displayWidth: {
 			type: 'string',
 		},
-		displayLength: {
+		displayHeight: {
 			type: 'string',
 		},
 		enableCaption: {
 			type: 'boolean',
+			default: false,
+		},
+		slideshowSettings: {
+			type: 'object',
+			default: {},
 		},
 	},
 	edit: class extends Component {
@@ -141,12 +147,18 @@ registerBlockType('osx/dhis2-analytics', {
 			this.props.setAttributes({ displayWidth: newValue });
 		};
 
-		onChangeDisplayLength = (newValue) => {
-			this.props.setAttributes({ displayLength: newValue });
+		onChangeDisplayHeight = (newValue) => {
+			this.props.setAttributes({ displayHeight: newValue });
 		};
 
 		onChangeEnableCaption = (newValue) => {
 			this.props.setAttributes({ enableCaption: newValue });
+		};
+
+		onChangeSlideShowSettings = (key) => (value) => {
+			let currentSettings = this.props.attributes.slideshowSettings;
+			currentSettings = { ...currentSettings, [key]: value };
+			this.props.setAttributes({ slideshowSettings: currentSettings });
 		};
 
 		handleChange = panel => (event, isExpanded) => {
@@ -195,7 +207,7 @@ registerBlockType('osx/dhis2-analytics', {
 		render() {
 			const { dashboards } = this.state.dhisdata;
 
-			const { displayItem, displayMode, displaySize, displayWidth, displayLength, enableCaption } = this.props.attributes;
+			const { displayItem, displayMode, displaySize, displayWidth, displayHeight, enableCaption, slideshowSettings } = this.props.attributes;
 			let listDashboards = null;
 			if (dashboards) {
 				listDashboards = dashboards.filter(d => d.dashboardItems.length > 0).map((dashboard) =>
@@ -247,7 +259,7 @@ registerBlockType('osx/dhis2-analytics', {
 			}
 			return (
 				<div>
-					<h4 className="dhis2-header"  style={{marginTop:'2.33em', marginBottom: '1.33em', lineHeight: '1.5' }}> <div class="block-logo" ></div>DHIS2 Analytics Block</h4>
+					<h4 className="dhis2-header" style={{ marginTop: '2.33em', marginBottom: '1.33em', lineHeight: '1.5' }}> <div class="block-logo" ></div>DHIS2 Analytics Block</h4>
 					<ul className="analytics-dashboards" style={{ margin: 0, padding: 0 }}>
 						{
 							(dashboards) ? listDashboards : <CircularProgress />
@@ -265,41 +277,48 @@ registerBlockType('osx/dhis2-analytics', {
 									{ value: 'single', label: 'Single Item' },
 									{ value: 'multiple', label: 'Multiple Items' },
 								]}
-								onChange={this.onChangeDisplayItem} >
-							</SelectControl>
+								onChange={this.onChangeDisplayItem} />
 							{displayItem === 'multiple' ? <SelectControl
 								label="Display Mode"
 								value={displayMode}
 								options={[
-									{ value: '', label: 'Select Options' },
 									{ value: 'slideshow', label: 'Slideshow Display' },
 									{ value: 'stack', label: 'Stacked Display' },
 									{ value: 'report', label: 'Report Display' },
 								]}
-								onChange={this.onChangeDisplayMode} >
-							</SelectControl> : null}
+								onChange={this.onChangeDisplayMode} /> : null}
 							<SelectControl
 								label="Display Size"
 								value={displaySize}
 								options={[
-									{ value: 'fullwidth', label: 'Fullwidth' },
+									{ value: 'fullwidth', label: 'Full Size' },
 									{ value: 'custom', label: 'Custom size' },
 								]}
-								onChange={this.onChangeDisplaySize} >
-							</SelectControl>
+								onChange={this.onChangeDisplaySize} />
+
 							{displaySize === 'custom' ? <div>
-								<TextControl label="Custom width (px)" value={displayWidth} onChange={this.onChangeDisplayWidth}></TextControl>
-								<TextControl label="Custom Length (px)" value={displayLength} onChange={this.onChangeDisplayLength}></TextControl>
+								{displayItem === 'single' ? <TextControl label="Width" value={displayWidth} onChange={this.onChangeDisplayWidth} /> : null}
+								<TextControl label="Height" value={displayHeight} onChange={this.onChangeDisplayHeight} />
 							</div> : null}
-							<ToggleControl label="Enable Captions" checked={enableCaption} onChange={this.onChangeEnableCaption}></ToggleControl>
+							<ToggleControl label="Enable Captions" checked={enableCaption} onChange={this.onChangeEnableCaption} />
 							{/* Panel items goes here */}
 						</PanelBody>
-						<PanelBody
-							title={__('Slideshow settings')}
+						{displayItem === 'multiple' ? <PanelBody
+							title={__('Slideshow Settings')}
 							initialOpen={false}
 						>
+							<SelectControl
+								label="Mode"
+								value={slideshowSettings.mode}
+								options={[
+									{ value: '', label: 'Select Options' },
+									{ value: 'fade', label: 'Fade' },
+									{ value: 'horizontal', label: 'Horizontal' },
+									{ value: 'vertical', label: 'Vertical' },
+								]}
+								onChange={this.onChangeSlideShowSettings('mode')} />
 
-						</PanelBody>
+						</PanelBody> : null}
 					</InspectorControls>
 				</div>
 			);

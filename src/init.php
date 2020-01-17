@@ -297,6 +297,20 @@ function gen_uuid()
 
 function render_dynamic_block($attributes)
 {
+	print_r($attributes);
+	$displayItems = isset($attributes['displayItem']) ? $attributes['displayItem'] : 'single';
+	$displayMode = isset($attributes['displayMode']) ? $attributes['displayMode'] : 'slideshow';
+	$displaySize = isset($attributes['displaySize']) ? $attributes['displaySize'] : 'fullwidth';
+	$enableCaption = isset($attributes['enableCaption']) ? $attributes['enableCaption'] : false;
+	$height = '440px';
+	$width = '100vw';
+	if ($displaySize == 'custom') {
+		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : '440px';
+		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : '100%';
+	};
+
+	$height_width_style = 'width:' . $width . ';height:' . $height . ';';
+
 	ob_start();
 	$dashboard_items = $attributes['dashboard_items'];
 	// print_r($dashboard_items);
@@ -368,38 +382,45 @@ function render_dynamic_block($attributes)
 	if (!empty($chart_analysis)) {
 		displayChart($chart_analysis, $details);
 	}
-
-	$displayItems = $attributes['displayItem'];
 	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
 	if ($displayItems == "single") {
-		$id = $attributes['dashboard_items'][0]['data']['id'];
+		$id = $all_ids[0];
 	?>
-		<div id="<?php echo $id; ?>" class="dhis2-analytics-single">
-			<?php
-			if (!empty($all_ids)) {
-				foreach ($all_ids as $id) {
-			?>
-					<div id="<?php echo $id; ?>" class="dhis2-analytic-item" style="width:500px;height:500px;background:green"></div>
-			<?php
-				}
-			}
-			?>
-		</div>
+		<div id="<?php echo $id; ?>" style="<?php echo $height_width_style; ?>"></div>
 	<?php
 	} else {
-		// print_r($displayItems);
 	?>
-		<div class="analytics-slider">
+		<div class=<?php echo $displayMode; ?> style="height:<?php echo $height; ?>">
 			<?php
-			// $all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
 			?>
-					<div id=<?php echo $id; ?> class="dhis2-slide"></div>
-			<?php
+					<div id=<?php echo $id; ?> style="height:<?php echo $height; ?>;" class="dhis2-slide"></div>
+				<?php
 				}
 			}
+			if (strcmp($displayMode, 'slideshow') == 0) {
+				?>
+				<script>
+					$('.slideshow').bxSlider({
+						mode: 'fade',
+						pause: 20000,
+						responsive: true,
+						captions: true,
+						slideSelector: '.dhis2-slide',
+						pager: false,
+						auto: true,
+						autoDirection: true,
+						autoHover: true,
+						keyboardEnabled: true,
+					});
+				</script>
+			<?php
+			} else if (strcmp($displayMode, 'report') == 0) {
+			} else if (strcmp($displayMode, 'stacked') == 0) {
+			}
 			?>
+
 		</div>
 <?php
 	}
