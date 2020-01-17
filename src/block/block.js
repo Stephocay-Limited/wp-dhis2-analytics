@@ -112,8 +112,8 @@ registerBlockType('osx/dhis2-analytics', {
 			default: false,
 		},
 		slideshowSettings: {
-			type: 'object',
-			default: {},
+			type: 'array',
+			default: [],
 		},
 	},
 	edit: class extends Component {
@@ -307,6 +307,17 @@ registerBlockType('osx/dhis2-analytics', {
 							title={__('Slideshow Settings')}
 							initialOpen={false}
 						>
+							<SelectControl
+								label="Mode"
+								value={slideshowSettings.mode}
+								options={[
+									{ value: '', label: 'Select Options' },
+									{ value: 'fade', label: 'Fade' },
+									{ value: 'horizontal', label: 'Horizontal' },
+									{ value: 'vertical', label: 'Vertical' },
+								]}
+								onChange={this.onChangeSlideShowSettings('mode')} />
+
 							<SelectControl
 								label="Mode"
 								value={slideshowSettings.mode}
