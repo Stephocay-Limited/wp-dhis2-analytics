@@ -212,6 +212,28 @@ function register_dynamic_block()
 	// Hook server side rendering into render callback
 	// Make sure name matches registerBlockType in ./index.js
 	register_block_type('osx/dhis2-analytics', array(
+		'attributes'=>array(
+			'displaySize'=> array(
+				'type'=> 'string',
+				'default'=> 'fullwidth',
+			),
+			'displayMode'=> array(
+				'type'=> 'string',
+				'default'=> 'slideshow',
+			),
+			'displayItem'=> array(
+				'type'=> 'string',
+				'default'=> 'single',
+			),
+			'enableCaption'=> array(
+				'type'=> 'boolean',
+				'default'=> false,
+			),
+			'slideshowSettings'=> array(
+				'type'=> 'array',
+				'default'=> array(),
+			)
+		),
 		'render_callback' => 'render_dynamic_block'
 	));
 }
@@ -298,15 +320,15 @@ function gen_uuid()
 function render_dynamic_block($attributes)
 {
 	print_r($attributes);
-	$displayItems = isset($attributes['displayItem']) ? $attributes['displayItem'] : 'single';
-	$displayMode = isset($attributes['displayMode']) ? $attributes['displayMode'] : 'slideshow';
-	$displaySize = isset($attributes['displaySize']) ? $attributes['displaySize'] : 'fullwidth';
-	$enableCaption = isset($attributes['enableCaption']) ? $attributes['enableCaption'] : false;
+	$displayItems = $attributes['displayItem'];
+	$displayMode = $attributes['displayMode'];
+	$displaySize = $attributes['displaySize'];
+	$enableCaption = $attributes['enableCaption'];
 	$height = '440px';
-	$width = '100vw';
+	$width = '100%';
 	if ($displaySize == 'custom') {
-		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : '440px';
-		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : '100%';
+		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
+		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : $width;
 	};
 
 	$height_width_style = 'width:' . $width . ';height:' . $height . ';';
