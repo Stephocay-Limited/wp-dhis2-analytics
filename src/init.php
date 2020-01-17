@@ -319,7 +319,7 @@ function gen_uuid()
 
 function render_dynamic_block($attributes)
 {
-	print_r($attributes);
+	// print_r($attributes);
 	$displayItems = $attributes['displayItem'];
 	$displayMode = $attributes['displayMode'];
 	$displaySize = $attributes['displaySize'];
