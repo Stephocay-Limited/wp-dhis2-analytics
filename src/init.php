@@ -328,7 +328,7 @@ function render_dynamic_block($attributes)
 		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : $width;
 	};
 
-	$height_width_style = 'width:' . $width . ';height:' . $height . ';';
+	$height_width_style = 'width:' . $width . ';height:' . $height . '; overflow:auto;';
 	$slideshowSettings = json_encode($attributes['slideshowSettings']);
 	ob_start();
 	$dashboard_items = $attributes['dashboard_items'];

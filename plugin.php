@@ -5,7 +5,7 @@
  * Description: DHIS2 Analytics is a Wordpress DHIS2 webportal Plugin that allows adding DHIS2 dashboards to a Wordpress website.
  * Author: Stephen Ocaya, Stephocay Limited
  * Author URI: https://stephocay.com/
- * Version: 1.0.2
+ * Version: 1.0.3
  * License: GPL2+
  * License URI: https://www.gnu.org/licenses/gpl-2.0.txt
  *
