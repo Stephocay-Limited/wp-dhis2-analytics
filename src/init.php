@@ -187,6 +187,12 @@ function dhis2_analytics_style()
 		plugins_url('src/assets/bxslider/jquery.bxslider.min.css', dirname(__FILE__)),
 		false
 	);
+
+	wp_enqueue_style(
+		'tailwind-css',
+		plugins_url('src/assets/css/frontend/tailwind.min.css', dirname(__FILE__)),
+		false
+	);
 }
 
 function dhis2_analytics_script()
@@ -224,6 +230,10 @@ function register_dynamic_block()
 			'displayItem' => array(
 				'type' => 'string',
 				'default' => 'single',
+			),
+			'itemsPerRow' => array(
+				'type' => 'string',
+				'default' => '2',
 			),
 			'enableCaption' => array(
 				'type' => 'boolean',
@@ -321,8 +331,11 @@ function render_dynamic_block($attributes)
 	$displayMode = $attributes['displayMode'];
 	$displaySize = $attributes['displaySize'];
 	$enableCaption = $attributes['enableCaption'];
+	$itemsPerRow = 'w-1/' . $attributes['itemsPerRow'];
+	$grid = 'dhis2-slide';
 	$height = '440px';
 	$width = '100%';
+
 	if ($displaySize == 'custom') {
 		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
 		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : $width;
@@ -335,8 +348,6 @@ function render_dynamic_block($attributes)
 	$settings = get_option('dhis2_settings');
 	$details = json_encode($settings);
 	$base = $settings['dhis2_uri'];
-	// $base = $settings['dhis_uri'];
-
 	$reporttable_analysis = array();
 	$chart_analysis = array();
 	$map_analysis = array();
@@ -400,7 +411,13 @@ function render_dynamic_block($attributes)
 	if (!empty($chart_analysis)) {
 		displayChart($chart_analysis, $details);
 	}
+
+	if ($displayMode == 'grid') {
+		$displayMode = $displayMode . ' flex flex-wrap w-full';
+		$grid = $itemsPerRow . ' p-2';
+	}
 	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
+
 	if ($displayItems == "single") {
 		$id = $all_ids[0];
 	?>
@@ -408,12 +425,12 @@ function render_dynamic_block($attributes)
 	<?php
 	} else {
 	?>
-		<div class=<?php echo $displayMode; ?> style="height:<?php echo $height; ?>;width:450px;">
+		<div class="<?php echo $displayMode; ?>">
 			<?php
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
 			?>
-					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="height:<?php echo $height; ?>;" class="dhis2-slide"></div>
+					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="height:<?php echo $height; ?>;" class="<?php echo $grid; ?>"></div>
 				<?php
 				}
 			}
@@ -423,7 +440,7 @@ function render_dynamic_block($attributes)
 					var x = <?php echo $slideshowSettings; ?>;
 					var defaultConfig = {
 						mode: 'fade',
-						pause: 20000,
+						pause: 60000,
 						responsive: true,
 						captions: true,
 						slideSelector: 'div.dhis2-slide',
@@ -434,16 +451,14 @@ function render_dynamic_block($attributes)
 						keyboardEnabled: true,
 						captions: true,
 					}
-					// for (var prop in x) {
-					// 	defaultConfig[prop] = x[prop];
-					// }
-					console.log(JSON.stringify(defaultConfig, null, 2));
-
+					for (var prop in x) {
+						if (prop === 'pause') {
+							defaultConfig[prop] = parseInt(x[prop], 10);
+						}
+					}
 					$('.slideshow').bxSlider(defaultConfig);
 				</script>
 			<?php
-			} else if (strcmp($displayMode, 'report') == 0) {
-			} else if (strcmp($displayMode, 'stacked') == 0) {
 			}
 			?>
 
