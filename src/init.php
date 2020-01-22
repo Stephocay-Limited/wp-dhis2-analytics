@@ -413,7 +413,7 @@ function render_dynamic_block($attributes)
 	}
 
 	if ($displayMode == 'grid') {
-		$displayMode = $displayMode . ' flex flex-wrap w-full';
+		$displayMode = $displayMode . ' flex flex-wrap w-full bg-gray-100';
 		$grid = $itemsPerRow . ' p-2';
 	}
 	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
