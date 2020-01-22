@@ -111,9 +111,13 @@ registerBlockType('osx/dhis2-analytics', {
 			type: 'boolean',
 			default: false,
 		},
+		itemsPerRow: {
+			type: 'string',
+			default: '2',
+		},
 		slideshowSettings: {
-			type: 'array',
-			default: [],
+			type: 'object',
+			default: {},
 		},
 	},
 	edit: class extends Component {
@@ -145,6 +149,10 @@ registerBlockType('osx/dhis2-analytics', {
 
 		onChangeDisplayWidth = (newValue) => {
 			this.props.setAttributes({ displayWidth: newValue });
+		};
+
+		onChangeItemsPerRow = (newValue) => {
+			this.props.setAttributes({ itemsPerRow: newValue });
 		};
 
 		onChangeDisplayHeight = (newValue) => {
@@ -207,7 +215,7 @@ registerBlockType('osx/dhis2-analytics', {
 		render() {
 			const { dashboards } = this.state.dhisdata;
 
-			const { displayItem, displayMode, displaySize, displayWidth, displayHeight, enableCaption, slideshowSettings } = this.props.attributes;
+			const { displayItem, displayMode, displaySize, displayWidth, displayHeight, enableCaption, slideshowSettings, itemsPerRow } = this.props.attributes;
 			let listDashboards = null;
 			if (dashboards) {
 				listDashboards = dashboards.filter(d => d.dashboardItems.length > 0).map((dashboard) =>
@@ -283,10 +291,10 @@ registerBlockType('osx/dhis2-analytics', {
 								value={displayMode}
 								options={[
 									{ value: 'slideshow', label: 'Slideshow Display' },
-									{ value: 'stack', label: 'Stacked Display' },
-									{ value: 'report', label: 'Report Display' },
+									{ value: 'grid', label: 'Grid Display' },
 								]}
 								onChange={this.onChangeDisplayMode} /> : null}
+
 							<SelectControl
 								label="Display Size"
 								value={displaySize}
@@ -297,38 +305,17 @@ registerBlockType('osx/dhis2-analytics', {
 								onChange={this.onChangeDisplaySize} />
 
 							{displaySize === 'custom' ? <div>
-								{displayItem === 'single' ? <TextControl label="Width" value={displayWidth} onChange={this.onChangeDisplayWidth} /> : null}
+								{displayItem === 'single' || displayMode === 'grid' ? <TextControl label="Width" value={displayWidth} onChange={this.onChangeDisplayWidth} /> : null}
 								<TextControl label="Height" value={displayHeight} onChange={this.onChangeDisplayHeight} />
 							</div> : null}
+							{displayItem === 'single' || displayMode === 'grid' ? <TextControl label="Items Per Row" value={itemsPerRow} onChange={this.onChangeItemsPerRow} /> : null}
 							<ToggleControl label="Enable Captions" checked={enableCaption} onChange={this.onChangeEnableCaption} />
-							{/* Panel items goes here */}
 						</PanelBody>
-						{displayItem === 'multiple' ? <PanelBody
+						{displayMode === 'slideshow' ? <PanelBody
 							title={__('Slideshow Settings')}
 							initialOpen={false}
 						>
-							<SelectControl
-								label="Mode"
-								value={slideshowSettings.mode}
-								options={[
-									{ value: '', label: 'Select Options' },
-									{ value: 'fade', label: 'Fade' },
-									{ value: 'horizontal', label: 'Horizontal' },
-									{ value: 'vertical', label: 'Vertical' },
-								]}
-								onChange={this.onChangeSlideShowSettings('mode')} />
-
-							<SelectControl
-								label="Mode"
-								value={slideshowSettings.mode}
-								options={[
-									{ value: '', label: 'Select Options' },
-									{ value: 'fade', label: 'Fade' },
-									{ value: 'horizontal', label: 'Horizontal' },
-									{ value: 'vertical', label: 'Vertical' },
-								]}
-								onChange={this.onChangeSlideShowSettings('mode')} />
-
+							<TextControl label="Pause" value={slideshowSettings.pause} onChange={this.onChangeSlideShowSettings('pause')} />
 						</PanelBody> : null}
 					</InspectorControls>
 				</div>
