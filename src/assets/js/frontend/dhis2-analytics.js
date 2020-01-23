@@ -1,3 +1,8 @@
 /* eslint-disable no-undef */
-$(window).on('load', function () {
+$( document ).ready(function() {
+    $('#basic').on("click", function () {
+        $('.grid').printThis({
+          base: "https://jasonday.github.io/printThis/"
+        });
+    });
 });
