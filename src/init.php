@@ -112,7 +112,7 @@ function dhis2_analytics_assets()
 
 	wp_register_script(
 		'plugin-maps-js',
-		plugins_url('src/assets/js/new/map.js', dirname(__FILE__)),
+		plugins_url('src/assets/js/new/map-plugin-32.0.32.js', dirname(__FILE__)),
 		['jquery', 'openlayer-js', 'dhis2_analytics-js', 'ext-all-js', 'wp-blocks'],
 		null,
 		false
@@ -171,6 +171,11 @@ function dhis2_analytics_assets()
 
 add_action('wp_enqueue_scripts', 'dhis2_analytics_assets');
 add_action('admin_enqueue_scripts', 'dhis2_analytics_assets');
+
+add_action('plugins_loaded', 'dhis2_analytics_translation');
+function dhis2_analytics_translation() {
+	load_plugin_textdomain( 'dhis-analytics', false, dirname( plugin_basename(__FILE__) ) . '/src/js/new/i18n/i18n_module_en.properties' );
+}
 
 
 // Front end Assets ONLY
@@ -280,7 +285,7 @@ function displayMap($map_analysis, $details)
 		mapPlugin.url = dhis2.dhis2_uri;
 		mapPlugin.username = dhis2.dhis2_username;
 		mapPlugin.password = dhis2.dhis2_password;
-		mapPlugin.loadingIndicator = true;
+		// mapPlugin.loadingIndicator = true;
 		mapPlugin.load(mp_objects);
 	</script>
 <?php

@@ -8,6 +8,7 @@
  * Version: 1.0.5
  * License: GPL2+
  * License URI: https://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain: dhis-analytics
  *
  * @package OSX
  */
