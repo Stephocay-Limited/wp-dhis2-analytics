@@ -16,6 +16,8 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Subject from '@material-ui/icons/Subject';
+import Link from '@material-ui/icons/Link';
 // import logo from '../assets/img/dhis2_short.png';
 
 const { __ } = wp.i18n;
@@ -197,7 +199,7 @@ registerBlockType('osx/dhis2-analytics', {
 					const textItems = dashboard.dashboardItems.filter(item => {
 						return item.type === 'TEXT';
 					}).map(i => {
-						return { ...i, text: { displayName: 'TEXT', id: i.id, text: i.text }, data: { displayName: 'TEXT', id: i.id, text: i.text } };
+						return { ...i, text: { displayName: 'Text Description', id: i.id, text: i.text }, data: { displayName: 'Text Description', id: i.id, text: i.text } };
 					});
 
 					dashboardItems = [...dashboardItems, ...textItems];
@@ -259,6 +261,10 @@ registerBlockType('osx/dhis2-analytics', {
 											icon = <BorderAll className="item-type-icon" />;
 										} else if (type === 'MAP') {
 											icon = <Public className="item-type-icon" />;
+										}else if (type === 'TEXT') {
+											icon = <Subject className="item-type-icon" />;
+										}else if (type === 'RESOURCES') {
+											icon = <Link className="item-type-icon" />;
 										}
 										return <li key={dashboardItem.data.id} className="dashboard-item">
 											<label htmlFor={dashboardItem.data.id} className="dashboard-item-label">

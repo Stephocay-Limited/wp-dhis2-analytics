@@ -214,6 +214,13 @@ function dhis2_analytics_script()
 		['jquery'],
 		false
 	);
+
+	wp_enqueue_script(
+		'dhis2_analytics-showdown-js',
+		plugins_url('src/assets/js/frontend/showdown.min.js', dirname(__FILE__)),
+		['jquery'],
+		false
+	);
 }
 add_action('wp_enqueue_scripts', 'dhis2_analytics_style');
 add_action('wp_enqueue_scripts', 'dhis2_analytics_script');
@@ -315,11 +322,28 @@ function displayResources($resources_analysis, $details)
 ?>
 	<script>
 		var dhis2 = <?php echo $details; ?>;
-		console.log(dhis2);
 		var ct_objects = <?php echo $resource_elements; ?>;
 	</script>
+	<a>This is nicer</a>
 	<?php
 };
+
+function displayText($text){
+	$description = json_encode($text[0]['text']);
+	$el = json_encode($text[0]['el']);
+	?>
+	<script>
+		$(document).ready(function(){
+			var text = <?php echo $description; ?>;
+			var converter = new showdown.Converter();
+			var id = <?php echo $el; ?>;
+			var textDescription      = converter.makeHtml(text);
+			document.getElementById(id).innerHTML = textDescription;
+			// alert(document.getElementById(id).innerHTML);
+		});
+	</script>
+	<?php
+}
 
 function gen_uuid()
 {
@@ -350,22 +374,7 @@ function gen_uuid()
 
 function render_dynamic_block($attributes)
 {
-	$displayItems = $attributes['displayItem'];
-	$displayMode = $attributes['displayMode'];
-	$displaySize = $attributes['displaySize'];
-	$enableCaption = $attributes['enableCaption'];
-	$itemsPerRow = 'w-1/' . $attributes['itemsPerRow'];
-	$grid = 'dhis2-slide';
-	$height = '440px';
-	$width = '100%';
 
-	if ($displaySize == 'custom') {
-		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
-		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : $width;
-	};
-
-	$height_width_style = 'width:' . $width . ';height:' . $height . '; overflow:auto;';
-	$slideshowSettings = json_encode($attributes['slideshowSettings']);
 	ob_start();
 	$dashboard_items = $attributes['dashboard_items'];
 	$settings = get_option('dhis2_settings');
@@ -375,16 +384,14 @@ function render_dynamic_block($attributes)
 	$chart_analysis = array();
 	$map_analysis = array();
 	$resources_analysis = array();
+	$text_analysis = array();
 	$rt_ids = array();
 	$map_ids = array();
 	$chart_ids = array();
 	$resources_ids = array();
+	$text_ids = array();
 
-	$rt = 1;
-	$mp = 1;
-	$ct = 1;
 	if (is_array($dashboard_items) && !empty($dashboard_items)) {
-		print_r($dashboard_items);
 		foreach ($dashboard_items as $dashboard_item) {
 
 			$type = $dashboard_item['type'];
@@ -394,11 +401,9 @@ function render_dynamic_block($attributes)
 					$rt_id = $dashboard_item['reportTable']['id'];
 					$rt_element = array("el" => "reportTable_" . $uuid, "id" => $rt_id);
 					array_push($reporttable_analysis, $rt_element);
-					// print_r($reporttable_analysis);
 					if (!in_array("reportTable_" . $uuid, $rt_ids)) {
 						array_push($rt_ids, "reportTable_" . $uuid);
 					}
-					$rt++;
 					break;
 				case 'MAP':
 					$map_id = $dashboard_item['map']['id'];
@@ -407,7 +412,6 @@ function render_dynamic_block($attributes)
 					if (!in_array("map_" . $uuid, $map_ids)) {
 						array_push($map_ids, "map_" . $uuid);
 					}
-					$mp++;
 					break;
 				case 'CHART':
 					$chart_id = $dashboard_item['chart']['id'];
@@ -417,17 +421,24 @@ function render_dynamic_block($attributes)
 					if (!in_array("chart_" . $uuid, $chart_ids)) {
 						array_push($chart_ids, "chart_" . $uuid);
 					}
-					$ct++;
 					break;
 				case 'RESOURCES':
 					$resources_id = $dashboard_item['resources']['id'];
-					$ct_element = array("el" => "resources_" . $uuid, "id" => $resources_id);
-					array_push($resources_analysis, $ct_element);
+					$rs_element = array("el" => "resources_" . $uuid, "id" => $resources_id);
+					array_push($resources_analysis, $rs_element);
 
 					if (!in_array("resources_" . $uuid, $resources_ids)) {
 						array_push($resources_ids, "resources_" . $uuid);
 					}
-					$ct++;
+					break;
+				case 'TEXT':
+					$text_id = $dashboard_item['text']['id'];
+					$tx_element = array("el" => "text_" . $uuid, "id" => $text_id,"text"=>$dashboard_item['text']['text'], 'text-class'=>true);
+					array_push($text_analysis, $tx_element);
+
+					if (!in_array("text_" . $uuid, $text_ids)) {
+						array_push($text_ids, "text_" . $uuid);
+					}
 					break;
 				default:
 					echo "DHIS2 Analytics Object not supported";
@@ -451,17 +462,48 @@ function render_dynamic_block($attributes)
 		displayResources($resources_analysis, $details);
 	}
 
+	if (!empty($text_analysis)) {
+		displayText($text_analysis);
+	}
+
 	if ($displayMode == 'grid') {
 		$print = true;
 		$displayMode = $displayMode . ' flex flex-wrap w-full bg-gray-100';
 		$grid = $itemsPerRow . ' p-2';
 	}
-	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
+	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids, $text_ids, $resources_ids);
+
+	$displayItems = $attributes['displayItem'];
+	$displayMode = $attributes['displayMode'];
+	$displaySize = $attributes['displaySize'];
+	$enableCaption = $attributes['enableCaption'];
+	$itemsPerRow = 'w-1/' . $attributes['itemsPerRow'];
+	$grid = 'dhis2-slide';
+	$height = '440px';
+	$width = '100%';
+	$text = 'text-description';
+
+	if ($displaySize == 'custom') {
+		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
+		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : $width;
+	};
+
+	
+	$slideshowSettings = json_encode($attributes['slideshowSettings']);
 
 	if ($displayItems == "single") {
 		$id = $all_ids[0];
+		$text = explode("_",$id)[0];
+		if(strcmp($text, 'text') == 0){
+			$grid = $grid." text-class";
+			$height = "100%";
+		}
+		
+		$height_width_style = 'width:' . $width . ';height:' . $height . '; overflow:auto;';
+
+		// echo $id;
 	?>
-		<div id="<?php echo $id; ?>" style="<?php echo $height_width_style; ?>"></div>
+		<div id="<?php echo $id; ?>" style="<?php echo $height_width_style; ?>" class="<?php echo $grid; ?>"></div>
 	<?php
 	} else {
 		// echo $print;
@@ -479,7 +521,12 @@ function render_dynamic_block($attributes)
 			<?php
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
-			?>
+					$text = explode("_",$id)[0];
+					if(strcmp($text, 'text') == 0){
+						$grid = $grid." text-class";
+						$height = "100%";
+					}
+				?>
 					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="height:<?php echo $height; ?>; overflow: auto" class="<?php echo $grid; ?>"></div>
 				<?php
 				}
