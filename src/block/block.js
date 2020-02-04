@@ -31,7 +31,7 @@ const dhis_settings = osxGlobal.dhis2setting;
 const dhis2_uri = dhis_settings.dhis2_uri;
 const dhis2_username = dhis_settings.dhis2_username;
 const dhis2_password = dhis_settings.dhis2_password;
-const dashboard_url = dhis2_uri + '/api/dashboards.json?paging=false&fields=id,name,dashboardItems[type,reportTable[id,displayName],chart[id,displayName],map[id,displayName]]';
+const dashboard_url = dhis2_uri + '/api/dashboards.json?paging=false&fields=id,name,dashboardItems[id,name,text,type,reportTable[id,displayName],chart[id,displayName],map[id,displayName],resources[id,displayName]]';
 
 const getDashboards = async () => {
 	const res = await axios.get(dashboard_url, {
@@ -178,11 +178,30 @@ registerBlockType('osx/dhis2-analytics', {
 		componentDidMount() {
 			getDashboards().then(data => {
 				const filtered = data.dashboards.map(dashboard => {
-					const dashboardItems = dashboard.dashboardItems.map(item => {
+					let dashboardItems = dashboard.dashboardItems.map(item => {
 						return { ...item, data: item.reportTable || item.map || item.chart };
 					}).filter(di => {
 						return di.data;
 					});
+
+					dashboard.dashboardItems.filter(item => {
+						return item.type === 'RESOURCES';
+					}).forEach(i => {
+						const foundItems = i.resources.map(r => {
+							return { ...i, resources: r, data: r };
+						});
+
+						dashboardItems = [...dashboardItems, ...foundItems];
+					});
+
+					const textItems = dashboard.dashboardItems.filter(item => {
+						return item.type === 'TEXT';
+					}).map(i => {
+						return { ...i, text: { displayName: 'TEXT', id: i.id, text: i.text }, data: { displayName: 'TEXT', id: i.id, text: i.text } };
+					});
+
+					dashboardItems = [...dashboardItems, ...textItems];
+
 					return { ...dashboard, dashboardItems };
 				});
 				this.setState(
