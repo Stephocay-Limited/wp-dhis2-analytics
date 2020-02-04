@@ -295,6 +295,18 @@ function displayChart($chart_analysis, $details)
 		chartPlugin.loadingIndicator = true;
 		chartPlugin.load(ct_objects);
 	</script>
+<?php
+};
+
+function displayResources($resources_analysis, $details)
+{
+	$resource_elements = json_encode($resources_analysis);
+?>
+	<script>
+		var dhis2 = <?php echo $details; ?>;
+		console.log(dhis2);
+		var ct_objects = <?php echo $resource_elements; ?>;
+	</script>
 	<?php
 };
 
@@ -351,20 +363,21 @@ function render_dynamic_block($attributes)
 	$reporttable_analysis = array();
 	$chart_analysis = array();
 	$map_analysis = array();
+	$resources_analysis = array();
 	$rt_ids = array();
 	$map_ids = array();
 	$chart_ids = array();
+	$resources_ids = array();
 
 	$rt = 1;
 	$mp = 1;
 	$ct = 1;
 	if (is_array($dashboard_items) && !empty($dashboard_items)) {
-		// print_r($dashboard_items);
+		print_r($dashboard_items);
 		foreach ($dashboard_items as $dashboard_item) {
 
 			$type = $dashboard_item['type'];
 			$uuid = gen_uuid();
-			// echo $type;
 			switch ($type) {
 				case "REPORT_TABLE":
 					$rt_id = $dashboard_item['reportTable']['id'];
@@ -395,6 +408,16 @@ function render_dynamic_block($attributes)
 					}
 					$ct++;
 					break;
+				case 'RESOURCES':
+					$resources_id = $dashboard_item['resources']['id'];
+					$ct_element = array("el" => "resources_" . $uuid, "id" => $resources_id);
+					array_push($resources_analysis, $ct_element);
+
+					if (!in_array("resources_" . $uuid, $resources_ids)) {
+						array_push($resources_ids, "resources_" . $uuid);
+					}
+					$ct++;
+					break;
 				default:
 					echo "DHIS2 Analytics Object not supported";
 					break;
@@ -410,6 +433,10 @@ function render_dynamic_block($attributes)
 	}
 	if (!empty($chart_analysis)) {
 		displayChart($chart_analysis, $details);
+	}
+
+	if (!empty($resources_analysis)) {
+		displayResources($resources_analysis, $details);
 	}
 
 	if ($displayMode == 'grid') {
