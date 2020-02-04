@@ -112,7 +112,7 @@ function dhis2_analytics_assets()
 
 	wp_register_script(
 		'plugin-maps-js',
-		plugins_url('src/assets/js/new/map.js', dirname(__FILE__)),
+		plugins_url('src/assets/js/new/map-plugin-32.0.32.js', dirname(__FILE__)),
 		['jquery', 'openlayer-js', 'dhis2_analytics-js', 'ext-all-js', 'wp-blocks'],
 		null,
 		false
@@ -172,6 +172,11 @@ function dhis2_analytics_assets()
 add_action('wp_enqueue_scripts', 'dhis2_analytics_assets');
 add_action('admin_enqueue_scripts', 'dhis2_analytics_assets');
 
+add_action('plugins_loaded', 'dhis2_analytics_translation');
+function dhis2_analytics_translation() {
+	load_plugin_textdomain( 'dhis-analytics', false, dirname( plugin_basename(__FILE__) ) . '/src/js/new/i18n/i18n_module_en.properties' );
+}
+
 
 // Front end Assets ONLY
 function dhis2_analytics_style()
@@ -200,6 +205,12 @@ function dhis2_analytics_script()
 	wp_enqueue_script(
 		'dhis2_analytics-frontend-js',
 		plugins_url('src/assets/js/frontend/dhis2-analytics.js', dirname(__FILE__)),
+		['jquery'],
+		false
+	);
+	wp_enqueue_script(
+		'dhis2_analytics-printthis-js',
+		plugins_url('src/assets/js/frontend/printThis.js', dirname(__FILE__)),
 		['jquery'],
 		false
 	);
@@ -274,7 +285,7 @@ function displayMap($map_analysis, $details)
 		mapPlugin.url = dhis2.dhis2_uri;
 		mapPlugin.username = dhis2.dhis2_username;
 		mapPlugin.password = dhis2.dhis2_password;
-		mapPlugin.loadingIndicator = true;
+		// mapPlugin.loadingIndicator = true;
 		mapPlugin.load(mp_objects);
 	</script>
 <?php
@@ -424,6 +435,7 @@ function render_dynamic_block($attributes)
 			}
 		}
 	}
+	$print = false;
 
 	if (!empty($reporttable_analysis)) {
 		displayTable($reporttable_analysis, $details);
@@ -440,7 +452,8 @@ function render_dynamic_block($attributes)
 	}
 
 	if ($displayMode == 'grid') {
-		$displayMode = $displayMode . ' flex flex-wrap w-full';
+		$print = true;
+		$displayMode = $displayMode . ' flex flex-wrap w-full bg-gray-100';
 		$grid = $itemsPerRow . ' p-2';
 	}
 	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids);
@@ -451,13 +464,23 @@ function render_dynamic_block($attributes)
 		<div id="<?php echo $id; ?>" style="<?php echo $height_width_style; ?>"></div>
 	<?php
 	} else {
-	?>
-		<div class="<?php echo $displayMode; ?>">
+		// echo $print;
+		if($print){
+			?>
+			<a id="basic" href="#nada" class="btn btn-gray bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" style="width:16px; margin-right: 5px;"><path d="M4 16H0V6h20v10h-4v4H4v-4zm2-4v6h8v-6H6zM4 0h12v5H4V0zM2 8v2h2V8H2zm4 0v2h2V8H6z"/></svg>
+				Print Block 
+			</a>
+
+			<?php
+		}
+	?> 
+		<div class="<?php echo $displayMode; ?> print-div">
 			<?php
 			if (!empty($all_ids)) {
 				foreach ($all_ids as $id) {
 			?>
-					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="height:<?php echo $height; ?>;" class="<?php echo $grid; ?>"></div>
+					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="height:<?php echo $height; ?>; overflow: auto" class="<?php echo $grid; ?>"></div>
 				<?php
 				}
 			}
