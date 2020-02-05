@@ -7,3 +7,8 @@
 .text-class p{
     padding-bottom: 0em;
 }
+
+div.grid div{
+    margin-bottom: 1.4em;
+    border: 1px solid rgb(244, 251, 255);
+}
