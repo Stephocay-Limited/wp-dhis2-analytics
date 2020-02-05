@@ -488,10 +488,11 @@ function render_dynamic_block($attributes)
 	$displaySize = $attributes['displaySize'];
 	$enableCaption = $attributes['enableCaption'];
 	$itemsPerRow = 'w-1/' . $attributes['itemsPerRow'];
-	$grid = 'dhis2-slide';
+	$grid = 'dhis2-slide border-all';
 	$height = '440px';
 	$width = '100%';
 	$text = 'text-description';
+	$showWidth = true;
 
 	if ($displaySize == 'custom') {
 		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
@@ -505,6 +506,7 @@ function render_dynamic_block($attributes)
 		$print = true;
 		$displayMode = $displayMode . ' flex w-full flex-wrap bg-gray-100';
 		$grid = $itemsPerRow . ' p-2';
+		$showWidth = false;
 	}
 
 ?>
@@ -523,9 +525,10 @@ function render_dynamic_block($attributes)
 					$height = "100%";
 				}
 
-				$height_width_style = 'width:' . $width . '; height:' . $height . ';';
+				$height_width_style = (!$showWidth) ? 'height:' . $height . ';' : 'width:' . $width . '; height:' . $height . ';';
+				// echo $height_width_style;
 		?>
-				<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; ?>; overflow: auto;" class="<?php echo $grid; ?>"></div>
+				<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; ?>; overflow: auto;" class="<?php echo $grid; ?> border-all"></div>
 			<?php
 			}
 			if (strcmp($displayMode, 'slideshow') == 0) {
