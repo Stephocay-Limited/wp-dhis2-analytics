@@ -141,7 +141,7 @@ function dhis2_analytics_assets()
 	wp_enqueue_script('bxslider-js');
 
 	// WP Localized globals. Use dynamic PHP stuff in JavaScript via `osxGlobal` object.
-	
+
 	wp_localize_script(
 		'dhis2_analytics-js',
 		'osxGlobal', // Array containing dynamic data for a JS Global.
@@ -174,8 +174,9 @@ add_action('wp_enqueue_scripts', 'dhis2_analytics_assets');
 add_action('admin_enqueue_scripts', 'dhis2_analytics_assets');
 
 add_action('plugins_loaded', 'dhis2_analytics_translation');
-function dhis2_analytics_translation() {
-	load_plugin_textdomain( 'dhis-analytics', false, dirname( plugin_basename(__FILE__) ) . '/src/js/new/i18n/i18n_module_en.properties' );
+function dhis2_analytics_translation()
+{
+	load_plugin_textdomain('dhis-analytics', false, dirname(plugin_basename(__FILE__)) . '/src/js/new/i18n/i18n_module_en.properties');
 }
 
 
@@ -322,36 +323,37 @@ function displayResources($resources_analysis, $details)
 	$resource_elements = json_encode($resources_analysis);
 ?>
 	<script>
-		$(document).ready(function(){
+		$(document).ready(function() {
 			var dhis2 = <?php echo $details; ?>;
 			var rs_objects = <?php echo $resource_elements; ?>;
-			
 
-			rs_objects.forEach(function(rs_object){
-				var url = dhis2.dhis2_uri+"/api/documents/"+rs_object['id']+"/data";
+
+			rs_objects.forEach(function(rs_object) {
+				var url = dhis2.dhis2_uri + "/api/documents/" + rs_object['id'] + "/data";
 				var id = rs_object['el'];
 				document.getElementById(id).innerHTML = url;
 			});
 		});
 	</script>
 	<a>This is nicer</a>
-	<?php
+<?php
 };
 
-function displayText($text){
+function displayText($text)
+{
 	$description = json_encode($text[0]['text']);
 	$el = json_encode($text[0]['el']);
-	?>
+?>
 	<script>
-		$(document).ready(function(){
+		$(document).ready(function() {
 			var text = <?php echo $description; ?>;
 			var converter = new showdown.Converter();
 			var id = <?php echo $el; ?>;
-			var textDescription      = converter.makeHtml(text);
+			var textDescription = converter.makeHtml(text);
 			document.getElementById(id).innerHTML = textDescription;
 		});
 	</script>
-	<?php
+<?php
 }
 
 function gen_uuid()
@@ -442,7 +444,7 @@ function render_dynamic_block($attributes)
 					break;
 				case 'TEXT':
 					$text_id = $dashboard_item['text']['id'];
-					$tx_element = array("el" => "text_" . $uuid, "id" => $text_id,"text"=>$dashboard_item['text']['text'], 'text-class'=>true);
+					$tx_element = array("el" => "text_" . $uuid, "id" => $text_id, "text" => $dashboard_item['text']['text'], 'text-class' => true);
 					array_push($text_analysis, $tx_element);
 
 					if (!in_array("text_" . $uuid, $text_ids)) {
@@ -475,8 +477,6 @@ function render_dynamic_block($attributes)
 		displayText($text_analysis);
 	}
 
-	
-
 	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids, $text_ids, $resources_ids);
 
 	$displayItems = $attributes['displayItem'];
@@ -494,67 +494,66 @@ function render_dynamic_block($attributes)
 		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : $width;
 	};
 
-	
+
 	$slideshowSettings = json_encode($attributes['slideshowSettings']);
 
 	if ($displayMode == 'grid') {
 		$print = true;
-		$displayMode = $displayMode . ' flex flex-wrap bg-gray-100';
+		$displayMode = $displayMode . ' flex w-full flex-wrap bg-gray-100';
 		$grid = $itemsPerRow . ' p-2';
 	}
 
-	?>
-	<div class="<?php echo $displayMode;?> print-div">
-	<?php
-	if(!empty($all_ids)){
-		foreach($all_ids as $id){
-			$text = explode("_",$id)[0];
-			if(strcmp($text, 'text') == 0){
-				$grid = $grid." text-class";
-				$height = "100%";
-			}
-
-			if(strcmp($text, 'resources') == 0){
-				$grid = $grid." resource-class";
-				$height = "100%";
-			}
-
-			$height_width_style = 'width:' . $width . ';height:' . $height . ';';
-			?>
-				<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; ?>;" class="<?php echo $grid; ?>"></div>
-			<?php
-
-		}
-		if (strcmp($displayMode, 'slideshow') == 0) {
-			?>
-			<script>
-				var x = <?php echo $slideshowSettings; ?>;
-				var defaultConfig = {
-					mode: 'fade',
-					pause: 60000,
-					responsive: true,
-					captions: true,
-					slideSelector: 'div.dhis2-slide',
-					pager: false,
-					auto: true,
-					autoDirection: true,
-					autoHover: true,
-					keyboardEnabled: true,
-					captions: true,
-				}
-				for (var prop in x) {
-					if (prop === 'pause') {
-						defaultConfig[prop] = parseInt(x[prop], 10);
-					}
-				}
-				$('.slideshow').bxSlider(defaultConfig);
-			</script>
+?>
+	<div class="<?php echo $displayMode; ?> print-div">
 		<?php
+		if (!empty($all_ids)) {
+			foreach ($all_ids as $id) {
+				$text = explode("_", $id)[0];
+				if (strcmp($text, 'text') == 0) {
+					$grid = $grid . " text-class";
+					$height = "100%";
+				}
+
+				if (strcmp($text, 'resources') == 0) {
+					$grid = $grid . " resource-class";
+					$height = "100%";
+				}
+
+				// $height_width_style = 'width:' . $width . ';height:' . $height . ';';
+		?>
+				<div title=<?php echo $id; ?> id=<?php echo $id; ?> class="<?php echo $grid; ?>"></div>
+			<?php
+			}
+			if (strcmp($displayMode, 'slideshow') == 0) {
+			?>
+				<script>
+					var x = <?php echo $slideshowSettings; ?>;
+					var defaultConfig = {
+						mode: 'fade',
+						pause: 60000,
+						responsive: true,
+						captions: true,
+						slideSelector: 'div.dhis2-slide',
+						pager: false,
+						auto: true,
+						autoDirection: true,
+						autoHover: true,
+						keyboardEnabled: true,
+						captions: true,
+					}
+					for (var prop in x) {
+						if (prop === 'pause') {
+							defaultConfig[prop] = parseInt(x[prop], 10);
+						}
+					}
+					$('.slideshow').bxSlider(defaultConfig);
+				</script>
+		<?php
+			}
 		}
-	}
-	?>
+		?>
 	</div>
-	<?php
+<?php
 
 	$output = ob_get_contents(); // collect output
 	ob_end_clean(); // Turn off ouput buffer
