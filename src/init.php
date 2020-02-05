@@ -523,9 +523,9 @@ function render_dynamic_block($attributes)
 					$height = "100%";
 				}
 
-				// $height_width_style = 'width:' . $width . ';height:' . $height . ';';
+				$height_width_style = 'width:' . $width . '; height:' . $height . ';';
 		?>
-				<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="height: <?php echo $height; ?>; overflow: auto;" class="<?php echo $grid; ?>"></div>
+				<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; ?>; overflow: auto;" class="<?php echo $grid; ?>"></div>
 			<?php
 			}
 			if (strcmp($displayMode, 'slideshow') == 0) {
