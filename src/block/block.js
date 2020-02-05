@@ -333,7 +333,7 @@ registerBlockType('osx/dhis2-analytics', {
 								{displayItem === 'single' || displayMode === 'grid' ? <TextControl label="Width" value={displayWidth} onChange={this.onChangeDisplayWidth} /> : null}
 								<TextControl label="Height" value={displayHeight} onChange={this.onChangeDisplayHeight} />
 							</div> : null}
-							{displayItem === 'single' || displayMode === 'grid' ? <TextControl label="Items Per Row" value={itemsPerRow} onChange={this.onChangeItemsPerRow} /> : null}
+							{displayItem === 'multiple' && displayMode === 'grid' ? <TextControl label="Items Per Row" value={itemsPerRow} onChange={this.onChangeItemsPerRow} /> : null}
 							<ToggleControl label="Enable Captions" checked={enableCaption} onChange={this.onChangeEnableCaption} />
 						</PanelBody>
 						{displayMode === 'slideshow' ? <PanelBody

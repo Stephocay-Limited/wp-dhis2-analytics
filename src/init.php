@@ -326,16 +326,19 @@ function displayResources($resources_analysis, $details)
 		$(document).ready(function() {
 			var dhis2 = <?php echo $details; ?>;
 			var rs_objects = <?php echo $resource_elements; ?>;
-
+			
+			// alert(JSON.stringify(rs_objects));
 
 			rs_objects.forEach(function(rs_object) {
 				var url = dhis2.dhis2_uri + "/api/documents/" + rs_object['id'] + "/data";
+				var name = rs_object['displayName'];
+				// alert(name);
+				var a = '<li class="resource-link"><a href="'+url+'">'+name+'</a></li>' ;
 				var id = rs_object['el'];
-				document.getElementById(id).innerHTML = url;
+				document.getElementById(id).innerHTML = a;
 			});
 		});
 	</script>
-	<a>This is nicer</a>
 <?php
 };
 
@@ -410,7 +413,7 @@ function render_dynamic_block($attributes)
 			switch ($type) {
 				case "REPORT_TABLE":
 					$rt_id = $dashboard_item['reportTable']['id'];
-					$rt_element = array("el" => "reportTable_" . $uuid, "id" => $rt_id);
+					$rt_element = array("el" => "reportTable_" . $uuid, "id" => $rt_id, "displayName"=>$displayName);
 					array_push($reporttable_analysis, $rt_element);
 					if (!in_array("reportTable_" . $uuid, $rt_ids)) {
 						array_push($rt_ids, "reportTable_" . $uuid);
@@ -418,7 +421,7 @@ function render_dynamic_block($attributes)
 					break;
 				case 'MAP':
 					$map_id = $dashboard_item['map']['id'];
-					$map_element = array("url" => $base, "el" => "map_" . $uuid, "id" => $map_id);
+					$map_element = array("url" => $base, "el" => "map_" . $uuid, "id" => $map_id, "displayName"=>$displayName);
 					array_push($map_analysis, $map_element);
 					if (!in_array("map_" . $uuid, $map_ids)) {
 						array_push($map_ids, "map_" . $uuid);
@@ -426,7 +429,7 @@ function render_dynamic_block($attributes)
 					break;
 				case 'CHART':
 					$chart_id = $dashboard_item['chart']['id'];
-					$ct_element = array("el" => "chart_" . $uuid, "id" => $chart_id);
+					$ct_element = array("el" => "chart_" . $uuid, "id" => $chart_id, "displayName"=>$displayName);
 					array_push($chart_analysis, $ct_element);
 
 					if (!in_array("chart_" . $uuid, $chart_ids)) {
@@ -435,7 +438,8 @@ function render_dynamic_block($attributes)
 					break;
 				case 'RESOURCES':
 					$resources_id = $dashboard_item['resources']['id'];
-					$rs_element = array("el" => "resources_" . $uuid, "id" => $resources_id);
+					$displayName = $dashboard_item['resources']['displayName'];
+					$rs_element = array("el" => "resources_" . $uuid, "id" => $resources_id, "displayName"=>$displayName);
 					array_push($resources_analysis, $rs_element);
 
 					if (!in_array("resources_" . $uuid, $resources_ids)) {
@@ -521,7 +525,7 @@ function render_dynamic_block($attributes)
 
 				// $height_width_style = 'width:' . $width . ';height:' . $height . ';';
 		?>
-				<div title=<?php echo $id; ?> id=<?php echo $id; ?> class="<?php echo $grid; ?>"></div>
+				<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="height: <?php echo $height; ?>; overflow: auto;" class="<?php echo $grid; ?>"></div>
 			<?php
 			}
 			if (strcmp($displayMode, 'slideshow') == 0) {
