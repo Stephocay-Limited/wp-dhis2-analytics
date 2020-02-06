@@ -34,7 +34,19 @@ const dhis2_uri = dhis_settings.dhis2_uri;
 const dhis2_username = dhis_settings.dhis2_username;
 const dhis2_password = dhis_settings.dhis2_password;
 const dashboard_url = dhis2_uri + '/api/dashboards.json?paging=false&fields=id,name,dashboardItems[id,name,text,type,reportTable[id,displayName],chart[id,displayName],map[id,displayName],resources[id,displayName]]';
+const version_url = dhis2_uri+'/api/system/info';
 
+const getDhis2Version = async()=>{
+	const system = await axios.get(version_url, {
+		params: {},
+		withCredentials: true,
+		auth: {
+			username: dhis2_username,
+			password: dhis2_password,
+		},
+	});
+	return system.data;
+}
 const getDashboards = async () => {
 	const res = await axios.get(dashboard_url, {
 		params: {},
@@ -80,6 +92,12 @@ registerBlockType('osx/dhis2-analytics', {
 			type: 'array',
 			default: [],
 		},
+
+		dhis_info: {
+			type: 'array',
+			default: [],
+		},
+
 		checkboxField: {
 			type: 'boolean',
 			default: true,
@@ -121,11 +139,12 @@ registerBlockType('osx/dhis2-analytics', {
 			type: 'object',
 			default: {},
 		},
+
 	},
 	edit: class extends Component {
 		constructor() {
 			super(...arguments);
-			this.state = { dhisdata: [], expanded: null };
+			this.state = { dhisdata: [], expanded: null , system_info: []};
 		}
 
 		onChangeContent = (newContent) => {
@@ -177,7 +196,24 @@ registerBlockType('osx/dhis2-analytics', {
 			});
 		};
 
+
 		componentDidMount() {
+			getDhis2Version().then(system =>{
+				// console.log(system);
+				let instance_info = {
+					"version" : system.version, 
+					"system_name": system.systemName, 
+					"id": system.systemId, 
+					"revision": system.revision
+				};
+				// console.log(instance_info);
+				this.setState(
+					{ system_info: instance_info }
+				);
+
+				this.props.setAttributes({dhis_info: this.state.system_info});
+			});
+
 			getDashboards().then(data => {
 				const filtered = data.dashboards.map(dashboard => {
 					let dashboardItems = dashboard.dashboardItems.map(item => {
@@ -229,11 +265,11 @@ registerBlockType('osx/dhis2-analytics', {
 					return i.data.id !== item.data.id;
 				});
 			}
-			// console.log(dashboard_items);
 			this.props.setAttributes({ dashboard_items });
 		};
 
 		render() {
+			console.log(this.state.system_info);
 			const { dashboards } = this.state.dhisdata;
 
 			const { displayItem, displayMode, displaySize, displayWidth, displayHeight, enableCaption, slideshowSettings, itemsPerRow } = this.props.attributes;

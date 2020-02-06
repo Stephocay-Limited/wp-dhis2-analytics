@@ -25,6 +25,7 @@ add_action('wp_print_scripts', 'remove_theme_jquery_scripts', 100);
 function dhis2_analytics_assets()
 {
 	$settings = get_option('dhis2_settings');
+	// print_r($attributes);
 	// Register block styles for both frontend + backend.
 	wp_register_style(
 		'dhis2_analytics-style-css', // Handle.
@@ -160,6 +161,11 @@ function dhis2_analytics_assets()
 	register_block_type(
 		'osx/dhis-block',
 		array(
+			'attributes'=>array(
+				'dhis_info'=>array(
+					'type'=>'string',
+				),
+			),
 			// Enqueue blocks.style.build.css on both frontend & backend.
 			'style'         => 'dhis2_analytics-style-css',
 			// Enqueue blocks.build.js in the editor only.
@@ -183,6 +189,7 @@ function dhis2_analytics_translation()
 // Front end Assets ONLY
 function dhis2_analytics_style()
 {
+	echo($attributes['dhis_info']);
 	wp_enqueue_style(
 		'dhis2_analytics-frontend-css',
 		plugins_url('src/assets/css/frontend/dhis2-analytics.css', dirname(__FILE__)),
@@ -388,8 +395,9 @@ function gen_uuid()
 
 function render_dynamic_block($attributes)
 {
-
 	ob_start();
+	// print_r($attributes);
+
 	$dashboard_items = $attributes['dashboard_items'];
 	$settings = get_option('dhis2_settings');
 	$details = json_encode($settings);
@@ -506,6 +514,8 @@ function render_dynamic_block($attributes)
 		$print = true;
 		$displayMode = $displayMode . ' flex w-full flex-wrap bg-gray-100';
 		$grid = $itemsPerRow . ' p-2';
+
+		$owidth = ($attributes['itemsPerRow'] == 1) ? "width: 100%;" : "";
 		$showWidth = false;
 	}
 
@@ -525,10 +535,26 @@ function render_dynamic_block($attributes)
 					$height = "100%";
 				}
 
-				$height_width_style = (!$showWidth) ? 'height:' . $height . ';' : 'width:' . $width . '; height:' . $height . ';';
+				$overflow = (strcmp($text, 'reportTable') == 0) ? "overflow: auto;": "";
+
+
+				$height_width_style = 'width:' . $width . '; height:' . $height . ';';
 				// echo $height_width_style;
+				// echo $overflow;
 		?>
-				<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; ?>; overflow: auto;" class="<?php echo $grid; ?> border-all"></div>
+				<div style="<?php echo $owidth; ?> overflow:auto;" class="<?php echo $grid; ?> border-all flex flex-wrap">
+					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; echo $overflow; ?>;" class="w-full">
+					</div>
+					<?php
+					if($attributes['enableCaption']){
+					?>
+						<div class="flex-1 bg-gray-300 w-full opacity-75">
+							<h2 id="caption-<?php echo $id; ?>" class="text-black-600 text-lg p-2">Just a text</h2>
+						</div>
+					<?php
+						}
+					?>
+				</div>
 			<?php
 			}
 			if (strcmp($displayMode, 'slideshow') == 0) {
