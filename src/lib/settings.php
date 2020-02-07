@@ -57,7 +57,13 @@ function dhis2_settings_init(  ) {
 		'dhis2_pluginPage_section' 
 	);
 
-
+	add_settings_field( 
+		'dhis2_version', 
+		__( 'DHIS2 Version', 'wp-dhis2' ), 
+		'dhis2_version_render', 
+		'pluginPage', 
+		'dhis2_pluginPage_section' 
+	);
 }
 
 
@@ -90,6 +96,20 @@ function dhis2_password_render(  ) {
 
 }
 
+function dhis2_version_render(  ) { 
+
+	$options = get_option( 'dhis2_settings' );
+	$versions = array("","2.30+","2.29");
+
+	echo "<select id='dhis2_version' name='dhis2_settings[dhis2_version]'>";
+	foreach($versions as $version) {
+		$selected = ($options['dhis2_version']==$version) ? 'selected="selected"' : '';
+		$name = ($version == "") ? "--Select DHIS2 Version --" : $version;
+		echo "<option value='$version' $selected>$name</option>";
+	}
+	echo "</select>";
+}
+
 
 function dhis2_settings_section_callback(  ) { 
 
@@ -108,6 +128,5 @@ function dhis2_options_page(  ) {
 			submit_button();
 			?>
 		</form>
-		<?php
-
+	<?php
 }

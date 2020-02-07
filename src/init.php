@@ -25,7 +25,6 @@ add_action('wp_print_scripts', 'remove_theme_jquery_scripts', 100);
 function dhis2_analytics_assets()
 {
 	$settings = get_option('dhis2_settings');
-	// print_r($attributes);
 	// Register block styles for both frontend + backend.
 	wp_register_style(
 		'dhis2_analytics-style-css', // Handle.
@@ -111,14 +110,6 @@ function dhis2_analytics_assets()
 	);
 
 	wp_enqueue_script('plugin-tables-js');
-
-	wp_register_script(
-		'plugin-maps-js',
-		plugins_url('src/assets/js/new/map-plugin-32.0.32.js', dirname(__FILE__)),
-		['jquery', 'openlayer-js', 'dhis2_analytics-js', 'ext-all-js', 'wp-blocks'],
-		null,
-		false
-	);
 
 	wp_enqueue_script('plugin-maps-js');
 
@@ -211,6 +202,27 @@ function dhis2_analytics_style()
 
 function dhis2_analytics_script()
 {
+	$options = get_option('dhis2_settings');
+	$version = $options['dhis2_version'];
+
+	if($version == "2.29"){
+		wp_enqueue_script(
+			'plugin-maps-229-js',
+			plugins_url('src/assets/js/new/map29.js', dirname(__FILE__)),
+			['jquery', 'openlayer-js', 'dhis2_analytics-js', 'ext-all-js', 'wp-blocks'],
+			null,
+			false
+		);
+	}else{ //2.29
+		wp_enqueue_script(
+			'plugin-maps-js',
+			plugins_url('src/assets/js/new/map-plugin-32.0.32.js', dirname(__FILE__)),
+			['jquery', 'openlayer-js', 'dhis2_analytics-js', 'ext-all-js', 'wp-blocks'],
+			null,
+			false
+		);
+	}
+
 	wp_enqueue_script(
 		'dhis2_analytics-frontend-js',
 		plugins_url('src/assets/js/frontend/dhis2-analytics.js', dirname(__FILE__)),
@@ -396,7 +408,6 @@ function gen_uuid()
 function render_dynamic_block($attributes)
 {
 	ob_start();
-	// print_r($attributes);
 
 	$dashboard_items = $attributes['dashboard_items'];
 	$settings = get_option('dhis2_settings');
@@ -414,50 +425,67 @@ function render_dynamic_block($attributes)
 	$text_ids = array();
 
 	if (is_array($dashboard_items) && !empty($dashboard_items)) {
+		// print_r($dashboard_items);
 		foreach ($dashboard_items as $dashboard_item) {
-
+			
 			$type = $dashboard_item['type'];
+			// echo $dashboard_item['displayName'];
 			$uuid = gen_uuid();
 			switch ($type) {
 				case "REPORT_TABLE":
+					// print_r($dashboard_item);
 					$rt_id = $dashboard_item['reportTable']['id'];
-					$rt_element = array("el" => "reportTable_" . $uuid, "id" => $rt_id, "displayName"=>$displayName);
+					$rt_name = $dashboard_item['reportTable']['displayName'];
+					$rt_element = array("el" => "reportTable_" . $uuid, "id" => $rt_id, "displayName"=>$rt_name);
 					array_push($reporttable_analysis, $rt_element);
-					if (!in_array("reportTable_" . $uuid, $rt_ids)) {
-						array_push($rt_ids, "reportTable_" . $uuid);
+
+					$table = array("id"=>"reportTable_" . $uuid, "displayName"=>$rt_name);
+
+					if (!in_array($table, $rt_ids)) {
+						array_push($rt_ids, $table);
 					}
 					break;
 				case 'MAP':
 					$map_id = $dashboard_item['map']['id'];
-					$map_element = array("url" => $base, "el" => "map_" . $uuid, "id" => $map_id, "displayName"=>$displayName);
+					$mp_name = $dashboard_item['map']['displayName'];
+					$map_element = array("url" => $base, "el" => "map_" . $uuid, "id" => $map_id, "displayName"=>$mp_name);
 					array_push($map_analysis, $map_element);
-					if (!in_array("map_" . $uuid, $map_ids)) {
-						array_push($map_ids, "map_" . $uuid);
+
+					$map = array("id"=>"map_" . $uuid, "displayName"=>$mp_name);
+					if (!in_array($map, $map_ids)) {
+						array_push($map_ids, $map);
 					}
 					break;
 				case 'CHART':
 					$chart_id = $dashboard_item['chart']['id'];
-					$ct_element = array("el" => "chart_" . $uuid, "id" => $chart_id, "displayName"=>$displayName);
+					$ct_name = $dashboard_item['chart']['displayName'];
+					$ct_element = array("el" => "chart_" . $uuid, "id" => $chart_id, "displayName"=>$ct_name);
 					array_push($chart_analysis, $ct_element);
 
-					if (!in_array("chart_" . $uuid, $chart_ids)) {
-						array_push($chart_ids, "chart_" . $uuid);
+					$chart = array("id"=>"chart_" . $uuid, "displayName"=>$ct_name);
+
+					if (!in_array($chart, $chart_ids)) {
+						array_push($chart_ids, $chart);
 					}
 					break;
 				case 'RESOURCES':
-					$resources_id = $dashboard_item['resources']['id'];
-					$displayName = $dashboard_item['resources']['displayName'];
-					$rs_element = array("el" => "resources_" . $uuid, "id" => $resources_id, "displayName"=>$displayName);
+					$resource_id = $dashboard_item['resources']['id'];
+					$rs_name = $dashboard_item['resources']['displayName'];
+					$rs_element = array("el" => "resources_" . $uuid, "id" => $resource_id, "displayName"=>$rs_name);
 					array_push($resources_analysis, $rs_element);
+					
+					$resource = array("id"=>"resources_" . $uuid, "displayName"=>$rs_name);
 
-					if (!in_array("resources_" . $uuid, $resources_ids)) {
-						array_push($resources_ids, "resources_" . $uuid);
+					if (!in_array($resource, $resources_ids)) {
+						array_push($resources_ids, $resource);
 					}
 					break;
 				case 'TEXT':
 					$text_id = $dashboard_item['text']['id'];
 					$tx_element = array("el" => "text_" . $uuid, "id" => $text_id, "text" => $dashboard_item['text']['text'], 'text-class' => true);
 					array_push($text_analysis, $tx_element);
+
+					$text = array("id"=>"text_" . $uuid, "displayName"=>"");
 
 					if (!in_array("text_" . $uuid, $text_ids)) {
 						array_push($text_ids, "text_" . $uuid);
@@ -501,6 +529,7 @@ function render_dynamic_block($attributes)
 	$width = '100%';
 	$text = 'text-description';
 	$showWidth = true;
+	$itemName = "";
 
 	if ($displaySize == 'custom') {
 		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
@@ -522,8 +551,13 @@ function render_dynamic_block($attributes)
 ?>
 	<div class="<?php echo $displayMode; ?> print-div">
 		<?php
+		// print_r($all_ids);
 		if (!empty($all_ids)) {
-			foreach ($all_ids as $id) {
+			foreach ($all_ids as $content) {
+				$id = $content['id'];
+				$itemName = $content['displayName'];
+				// echo $itemName;
+
 				$text = explode("_", $id)[0];
 				if (strcmp($text, 'text') == 0) {
 					$grid = $grid . " text-class";
@@ -549,7 +583,7 @@ function render_dynamic_block($attributes)
 					if($attributes['enableCaption']){
 					?>
 						<div class="flex-1 bg-gray-300 w-full opacity-75">
-							<h2 id="caption-<?php echo $id; ?>" class="text-black-600 text-lg p-2">Just a text</h2>
+							<h2 id="caption-<?php echo $id; ?>" class="text-black-600 text-lg p-2"><?php echo $itemName; ?></h2>
 						</div>
 					<?php
 						}
