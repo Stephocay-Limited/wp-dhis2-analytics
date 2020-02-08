@@ -131,6 +131,11 @@ registerBlockType('osx/dhis2-analytics', {
 			type: 'boolean',
 			default: false,
 		},
+		shuffleItems: {
+			type: 'boolean',
+			default: false,
+		},
+
 		itemsPerRow: {
 			type: 'string',
 			default: '2',
@@ -182,6 +187,10 @@ registerBlockType('osx/dhis2-analytics', {
 
 		onChangeEnableCaption = (newValue) => {
 			this.props.setAttributes({ enableCaption: newValue });
+		};
+
+		onChangeShuffleItems = (newValue) => {
+			this.props.setAttributes({ shuffleItems: newValue });
 		};
 
 		onChangeSlideShowSettings = (key) => (value) => {
@@ -272,7 +281,7 @@ registerBlockType('osx/dhis2-analytics', {
 			console.log(this.state.system_info);
 			const { dashboards } = this.state.dhisdata;
 
-			const { displayItem, displayMode, displaySize, displayWidth, displayHeight, enableCaption, slideshowSettings, itemsPerRow } = this.props.attributes;
+			const { displayItem, displayMode, displaySize, displayWidth, displayHeight, enableCaption, slideshowSettings, itemsPerRow, shuffleItems } = this.props.attributes;
 			let listDashboards = null;
 			if (dashboards) {
 				listDashboards = dashboards.filter(d => d.dashboardItems.length > 0).map((dashboard) =>
@@ -370,13 +379,11 @@ registerBlockType('osx/dhis2-analytics', {
 								<TextControl label="Height" value={displayHeight} onChange={this.onChangeDisplayHeight} />
 							</div> : null}
 							{displayItem === 'multiple' && displayMode === 'grid' ? <TextControl label="Items Per Row" value={itemsPerRow} onChange={this.onChangeItemsPerRow} /> : null}
+							{displayItem === 'multiple' ? <ToggleControl label="Shuffle Items" checked={shuffleItems} onChange={this.onChangeShuffleItems} /> : null }
 							<ToggleControl label="Enable Captions" checked={enableCaption} onChange={this.onChangeEnableCaption} />
 						</PanelBody>
-						{displayMode === 'slideshow' ? <PanelBody
-							title={__('Slideshow Settings')}
-							initialOpen={false}
-						>
-							<TextControl label="Pause" value={slideshowSettings.pause} onChange={this.onChangeSlideShowSettings('pause')} />
+						{displayItem === 'multiple' && displayMode === 'slideshow' ? <PanelBody title={__('Slideshow Settings')} initialOpen={false}>
+							<TextControl label="Slide Duration" value={slideshowSettings.pause} onChange={this.onChangeSlideShowSettings('pause')} />
 						</PanelBody> : null}
 					</InspectorControls>
 				</div>

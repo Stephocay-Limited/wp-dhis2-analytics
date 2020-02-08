@@ -278,6 +278,10 @@ function register_dynamic_block()
 				'type' => 'boolean',
 				'default' => false,
 			),
+			'shuffleItems' => array(
+				'type' => 'boolean',
+				'default' => false,
+			),
 			'slideshowSettings' => array(
 				'type' => 'object',
 				'default' => array(),
@@ -541,7 +545,7 @@ function render_dynamic_block($attributes)
 
 	if ($displayMode == 'grid') {
 		$print = true;
-		$displayMode = $displayMode . ' flex w-full flex-wrap bg-gray-100';
+		$displayMode = $displayMode . ' flex w-full flex-wrap bg-gray-100 p-4';
 		$grid = $itemsPerRow . ' p-2';
 
 		$owidth = ($attributes['itemsPerRow'] == 1) ? "width: 100%;" : "";
@@ -549,9 +553,12 @@ function render_dynamic_block($attributes)
 	}
 
 ?>
-	<div class="<?php echo $displayMode; ?> print-div">
+	<div class="<?php echo $displayMode; ?> print-div" style="width: 100%;">
 		<?php
 		// print_r($all_ids);
+		if($attributes['shuffleItems']){
+			shuffle($all_ids);
+		}
 		if (!empty($all_ids)) {
 			foreach ($all_ids as $content) {
 				$id = $content['id'];
@@ -576,14 +583,14 @@ function render_dynamic_block($attributes)
 				// echo $height_width_style;
 				// echo $overflow;
 		?>
-				<div style="<?php echo $owidth; ?> overflow:auto;" class="<?php echo $grid; ?> border-all flex flex-wrap">
+				<div style="overflow:auto;" class="<?php echo $grid; ?> border-all flex flex-wrap">
 					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; echo $overflow; ?>;" class="w-full">
 					</div>
 					<?php
 					if($attributes['enableCaption']){
 					?>
 						<div class="flex-1 bg-gray-300 w-full opacity-75">
-							<h2 id="caption-<?php echo $id; ?>" class="text-black-600 text-lg p-2"><?php echo $itemName; ?></h2>
+							<p id="caption-<?php echo $id; ?>" class="text-black-600 text-lg p-2"><?php echo $itemName; ?></p>
 						</div>
 					<?php
 						}
