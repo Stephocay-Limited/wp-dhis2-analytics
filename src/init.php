@@ -180,7 +180,13 @@ function dhis2_analytics_translation()
 // Front end Assets ONLY
 function dhis2_analytics_style()
 {
-	echo($attributes['dhis_info']);
+	// echo($attributes['dhis_info']);
+	wp_enqueue_style(
+		'dhis2_analytics-material-ui-icons-css',
+		'//fonts.googleapis.com/icon?family=Material+Icons',
+		false
+	);
+
 	wp_enqueue_style(
 		'dhis2_analytics-frontend-css',
 		plugins_url('src/assets/css/frontend/dhis2-analytics.css', dirname(__FILE__)),
@@ -430,11 +436,13 @@ function render_dynamic_block($attributes)
 
 	if (is_array($dashboard_items) && !empty($dashboard_items)) {
 		// print_r($dashboard_items);
+		$icon = "help";
 		foreach ($dashboard_items as $dashboard_item) {
 			
 			$type = $dashboard_item['type'];
 			// echo $dashboard_item['displayName'];
 			$uuid = gen_uuid();
+			
 			switch ($type) {
 				case "REPORT_TABLE":
 					// print_r($dashboard_item);
@@ -442,8 +450,8 @@ function render_dynamic_block($attributes)
 					$rt_name = $dashboard_item['reportTable']['displayName'];
 					$rt_element = array("el" => "reportTable_" . $uuid, "id" => $rt_id, "displayName"=>$rt_name);
 					array_push($reporttable_analysis, $rt_element);
-
-					$table = array("id"=>"reportTable_" . $uuid, "displayName"=>$rt_name);
+					$icon = "border_all";
+					$table = array("id"=>"reportTable_" . $uuid, "displayName"=>$rt_name, "icon"=>$icon);
 
 					if (!in_array($table, $rt_ids)) {
 						array_push($rt_ids, $table);
@@ -454,8 +462,9 @@ function render_dynamic_block($attributes)
 					$mp_name = $dashboard_item['map']['displayName'];
 					$map_element = array("url" => $base, "el" => "map_" . $uuid, "id" => $map_id, "displayName"=>$mp_name);
 					array_push($map_analysis, $map_element);
+					$icon = "map";
 
-					$map = array("id"=>"map_" . $uuid, "displayName"=>$mp_name);
+					$map = array("id"=>"map_" . $uuid, "displayName"=>$mp_name, "icon"=>$icon);
 					if (!in_array($map, $map_ids)) {
 						array_push($map_ids, $map);
 					}
@@ -465,8 +474,9 @@ function render_dynamic_block($attributes)
 					$ct_name = $dashboard_item['chart']['displayName'];
 					$ct_element = array("el" => "chart_" . $uuid, "id" => $chart_id, "displayName"=>$ct_name);
 					array_push($chart_analysis, $ct_element);
+					$icon = "bar_chart";
 
-					$chart = array("id"=>"chart_" . $uuid, "displayName"=>$ct_name);
+					$chart = array("id"=>"chart_" . $uuid, "displayName"=>$ct_name, "icon"=>$icon);
 
 					if (!in_array($chart, $chart_ids)) {
 						array_push($chart_ids, $chart);
@@ -478,7 +488,7 @@ function render_dynamic_block($attributes)
 					$rs_element = array("el" => "resources_" . $uuid, "id" => $resource_id, "displayName"=>$rs_name);
 					array_push($resources_analysis, $rs_element);
 					
-					$resource = array("id"=>"resources_" . $uuid, "displayName"=>$rs_name);
+					$resource = array("id"=>"resources_" . $uuid, "displayName"=>$rs_name, "icon"=>$icon);
 
 					if (!in_array($resource, $resources_ids)) {
 						array_push($resources_ids, $resource);
@@ -488,11 +498,13 @@ function render_dynamic_block($attributes)
 					$text_id = $dashboard_item['text']['id'];
 					$tx_element = array("el" => "text_" . $uuid, "id" => $text_id, "text" => $dashboard_item['text']['text'], 'text-class' => true);
 					array_push($text_analysis, $tx_element);
+					$icon = "notes";
+					$txtName = $dashboard_item['text']['text'];
 
-					$text = array("id"=>"text_" . $uuid, "displayName"=>"");
+					$text = array("id"=>"text_" . $uuid, "displayName"=>"", "icon"=>$icon);
 
-					if (!in_array("text_" . $uuid, $text_ids)) {
-						array_push($text_ids, "text_" . $uuid);
+					if (!in_array($text, $text_ids)) {
+						array_push($text_ids, $text);
 					}
 					break;
 				default:
@@ -535,17 +547,23 @@ function render_dynamic_block($attributes)
 	$showWidth = true;
 	$itemName = "";
 
-	if ($displaySize == 'custom') {
+	if (($displaySize == 'custom' && $displayMode != 'slideshow')) {
 		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
 		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : $width;
 	};
+
+	//Slideshow Custom sizes
+	if($displaySize == 'custom' && $displayMode == 'slideshow'){
+		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
+		// $width = "100%";
+	}
 
 
 	$slideshowSettings = json_encode($attributes['slideshowSettings']);
 
 	if ($displayMode == 'grid') {
 		$print = true;
-		$displayMode = $displayMode . ' flex w-full flex-wrap bg-gray-100 p-4';
+		$displayMode = $displayMode . ' flex w-full flex-wrap bg-gray-100 p-2';
 		$grid = $itemsPerRow . ' p-2';
 
 		$owidth = ($attributes['itemsPerRow'] == 1) ? "width: 100%;" : "";
@@ -553,7 +571,7 @@ function render_dynamic_block($attributes)
 	}
 
 ?>
-	<div class="<?php echo $displayMode; ?> print-div" style="width: 100%;">
+	<div class="<?php echo $displayMode; ?> print-div p-2" style="width: 100%; max-width: 100%; height: 100%; min-height: 100%;">
 		<?php
 		// print_r($all_ids);
 		if($attributes['shuffleItems']){
@@ -561,8 +579,10 @@ function render_dynamic_block($attributes)
 		}
 		if (!empty($all_ids)) {
 			foreach ($all_ids as $content) {
+				// print_r($content);
 				$id = $content['id'];
 				$itemName = $content['displayName'];
+				$ico = $content['icon'];
 				// echo $itemName;
 
 				$text = explode("_", $id)[0];
@@ -578,19 +598,19 @@ function render_dynamic_block($attributes)
 
 				$overflow = (strcmp($text, 'reportTable') == 0) ? "overflow: auto;": "";
 
-
 				$height_width_style = 'width:' . $width . '; height:' . $height . ';';
 				// echo $height_width_style;
 				// echo $overflow;
 		?>
 				<div style="overflow:auto;" class="<?php echo $grid; ?> border-all flex flex-wrap">
-					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; echo $overflow; ?>;" class="w-full">
+					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; echo $overflow; ?>;" class="w-full pb-1">
 					</div>
 					<?php
 					if($attributes['enableCaption']){
 					?>
-						<div class="flex-1 bg-gray-300 w-full opacity-75">
-							<p id="caption-<?php echo $id; ?>" class="text-black-600 text-lg p-2"><?php echo $itemName; ?></p>
+						<div class="flex-1 bg-gray-300 w-full opacity-75 pb-1">
+							<i class="material-icons text-gray-500 pmd-md float-left p-1"><?php echo $ico; ?></i>
+							<p id="caption-<?php echo $id; ?>" class="text-black-600 text-md p-2"><?php echo $itemName; ?></p>
 						</div>
 					<?php
 						}
