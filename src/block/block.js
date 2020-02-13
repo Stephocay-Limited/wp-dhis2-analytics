@@ -135,7 +135,6 @@ registerBlockType('osx/dhis2-analytics', {
 			type: 'boolean',
 			default: false,
 		},
-
 		itemsPerRow: {
 			type: 'string',
 			default: '2',
@@ -144,7 +143,6 @@ registerBlockType('osx/dhis2-analytics', {
 			type: 'object',
 			default: {},
 		},
-
 	},
 	edit: class extends Component {
 		constructor() {

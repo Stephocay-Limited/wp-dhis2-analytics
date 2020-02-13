@@ -347,6 +347,37 @@ function displayChart($chart_analysis, $details)
 <?php
 };
 
+function displaySingleResources($resources_analysis, $details)
+{
+	$resource_elements = json_encode($resources_analysis);
+?>
+	<script>
+		$(document).ready(function() {
+			// alert("Loading Single resource");
+			var dhis2 = <?php echo $details; ?>;
+			var rs_objects = <?php echo $resource_elements; ?>;
+			//  = json_encode($rs_objects[0]['el']);
+
+			rs_objects.forEach(function(rs_object) {
+				var node = document.createElement("li");
+				var link = document.createElement("a");
+				var block_div = rs_object['el'];
+				// alert(block_div);
+				var resource_list = document.getElementById(block_div);
+				var url = dhis2.dhis2_uri + "/api/documents/" + rs_object['id'] + "/data";
+				var name = rs_object['displayName'];
+				link.innerText = name;
+				link.setAttribute('href', url);
+				node.setAttribute('class',"list-none list-outside p-1 border border-gray-600 w-full hover:bg-gray-200  text-md align-middle");
+				node.appendChild(link);
+				resource_list.appendChild(node);
+			});
+		});
+	</script>
+<?php
+}
+
+
 function displayResources($resources_analysis, $details)
 {
 	$resource_elements = json_encode($resources_analysis);
@@ -357,19 +388,23 @@ function displayResources($resources_analysis, $details)
 			var rs_objects = <?php echo $resource_elements; ?>;
 			
 			// alert(JSON.stringify(rs_objects));
-
 			rs_objects.forEach(function(rs_object) {
+				var node = document.createElement("li");
+				var link = document.createElement("a");
+				var block = rs_object['resource_block'];
+				var resource_list = document.getElementById(block);
 				var url = dhis2.dhis2_uri + "/api/documents/" + rs_object['id'] + "/data";
 				var name = rs_object['displayName'];
-				// alert(name);
-				var a = '<li class="resource-link"><a href="'+url+'">'+name+'</a></li>' ;
-				var id = rs_object['el'];
-				document.getElementById(id).innerHTML = a;
+				link.innerText = name;
+				link.setAttribute('href', url);
+				node.setAttribute('class',"list-none list-outside p-1 border border-gray-600 w-full hover:bg-gray-200");
+				node.appendChild(link);
+				resource_list.appendChild(node);
 			});
 		});
 	</script>
 <?php
-};
+}
 
 function displayText($text)
 {
@@ -418,6 +453,7 @@ function gen_uuid()
 function render_dynamic_block($attributes)
 {
 	ob_start();
+	// print_r($attributes);
 
 	$dashboard_items = $attributes['dashboard_items'];
 	$settings = get_option('dhis2_settings');
@@ -433,10 +469,13 @@ function render_dynamic_block($attributes)
 	$chart_ids = array();
 	$resources_ids = array();
 	$text_ids = array();
+	$resource_blocks = array();
+	$group_resources = true; //TODO: to change to dynamic setting
 
 	if (is_array($dashboard_items) && !empty($dashboard_items)) {
 		// print_r($dashboard_items);
 		$icon = "help";
+		$resource_block_id = gen_uuid();
 		foreach ($dashboard_items as $dashboard_item) {
 			
 			$type = $dashboard_item['type'];
@@ -485,10 +524,14 @@ function render_dynamic_block($attributes)
 				case 'RESOURCES':
 					$resource_id = $dashboard_item['resources']['id'];
 					$rs_name = $dashboard_item['resources']['displayName'];
-					$rs_element = array("el" => "resources_" . $uuid, "id" => $resource_id, "displayName"=>$rs_name);
+					$rs_element = array("el" => "resources_" . $uuid, "id" => $resource_id, "displayName"=>$rs_name, "resource_block"=>$resource_block_id);
 					array_push($resources_analysis, $rs_element);
+					$icon = "link";
+					if(!in_array($resource_block_id, $resource_blocks)){
+						array_push($resource_blocks, $resource_block_id);
+					}
 					
-					$resource = array("id"=>"resources_" . $uuid, "displayName"=>$rs_name, "icon"=>$icon);
+					$resource = array("id"=>"resources_" . $uuid, "displayName"=>$rs_name, "icon"=>$icon, "resource_block"=>$resource_block_id);
 
 					if (!in_array($resource, $resources_ids)) {
 						array_push($resources_ids, $resource);
@@ -525,129 +568,162 @@ function render_dynamic_block($attributes)
 		displayChart($chart_analysis, $details);
 	}
 
-	if (!empty($resources_analysis)) {
-		displayResources($resources_analysis, $details);
-	}
+	// echo $group_resources;
+	// if (!empty($resources_analysis) && $group_resources) {
+	// 	displayResources($resources_analysis, $details);
+	// }else{
+	// 	displaySingleResources($resources_analysis, $details);
+	// }
 
 	if (!empty($text_analysis)) {
 		displayText($text_analysis);
 	}
 
+	// print_r($resources_analysis);
 	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids, $text_ids, $resources_ids);
 
+	if(!empty($resources_analysis)){
+		if($group_resources){
+			$all_ids = array_merge($rt_ids, $map_ids, $chart_ids, $text_ids);
+			displayResources($resources_analysis, $details);
+		}else{
+			displaySingleResources($resources_analysis, $details);
+		}
+	}
+	
 	$displayItems = $attributes['displayItem'];
 	$displayMode = $attributes['displayMode'];
 	$displaySize = $attributes['displaySize'];
 	$enableCaption = $attributes['enableCaption'];
 	$itemsPerRow = 'w-1/' . $attributes['itemsPerRow'];
-	$grid = 'dhis2-slide border-all';
-	$height = '440px';
+	// $grid_columns = 'grid-cols-'.$attributes['itemsPerRow'].' gap-3';
+	$grid = 'dhis2-slide';
+	$height = '350px';
 	$width = '100%';
 	$text = 'text-description';
 	$showWidth = true;
 	$itemName = "";
 
+	$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
+	$height_width_style = 'height:' . $height . ';';
+
 	if (($displaySize == 'custom' && $displayMode != 'slideshow')) {
-		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
 		$width = isset($attributes['displayWidth']) ? $attributes['displayWidth'] : $width;
+		$height_width_style = 'width:' . $width . '; height:' . $height . ';';
 	};
 
 	//Slideshow Custom sizes
-	if($displaySize == 'custom' && $displayMode == 'slideshow'){
-		$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
-		// $width = "100%";
-	}
-
-
+	// if($displaySize == 'custom' && $displayMode == 'slideshow'){
+	// 	$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
+	// 	// $width = "100%";
+	// }
+		// echo $width;
 	$slideshowSettings = json_encode($attributes['slideshowSettings']);
 
 	if ($displayMode == 'grid') {
 		$print = true;
-		$displayMode = $displayMode . ' flex w-full flex-wrap bg-gray-100 p-2';
-		$grid = $itemsPerRow . ' p-2';
-
-		$owidth = ($attributes['itemsPerRow'] == 1) ? "width: 100%;" : "";
-		$showWidth = false;
+		$displayMode = 'grid w-full bg-gray-100 p-2';
+		$grid = $itemsPerRow;
 	}
-
+	// echo $displayMode;
 ?>
-	<div class="<?php echo $displayMode; ?> print-div p-2" style="width: 100%; max-width: 100%; height: 100%; min-height: 100%;">
-		<?php
-		// print_r($all_ids);
-		if($attributes['shuffleItems']){
-			shuffle($all_ids);
-		}
-		if (!empty($all_ids)) {
-			foreach ($all_ids as $content) {
-				// print_r($content);
-				$id = $content['id'];
-				$itemName = $content['displayName'];
-				$ico = $content['icon'];
-				// echo $itemName;
+	<!-- style="width: 100%; max-width: 100%; height: 100%; min-height: 100%;" -->
 
-				$text = explode("_", $id)[0];
-				if (strcmp($text, 'text') == 0) {
-					$grid = $grid . " text-class";
-					$height = "100%";
-				}
+	<div class="flex flex-wrap overflow-hidden bg-gray-200 <?php echo $displayMode; ?>" style="width: 100%; max-width: 100%; height: 100%; min-height: 100%;">
+		<?php 
+			if($attributes['shuffleItems']){
+				shuffle($all_ids);
+			}
+	
+			if (!empty($all_ids)) {
+				foreach ($all_ids as $content) {
+					// print_r($content);
+					$id = $content['id'];
+					$itemName = $content['displayName'];
+					$ico = $content['icon'];
+					// echo $itemName;
+	
+					$text = explode("_", $id)[0];
+					if (strcmp($text, 'text') == 0) {
+						$grid = $grid . " text-class";
+						$height = "100%";
+					}
+	
+					if (strcmp($text, 'resources') == 0) {
+						$grid = $grid . " resource-class";
+						$height = "100%";
+					}
 
-				if (strcmp($text, 'resources') == 0) {
-					$grid = $grid . " resource-class";
-					$height = "100%";
-				}
-
-				$overflow = (strcmp($text, 'reportTable') == 0) ? "overflow: auto;": "";
-
-				$height_width_style = 'width:' . $width . '; height:' . $height . ';';
-				// echo $height_width_style;
-				// echo $overflow;
-		?>
-				<div style="overflow:auto;" class="<?php echo $grid; ?> border-all flex flex-wrap">
-					<div title=<?php echo $id; ?> id=<?php echo $id; ?> style="<?php echo $height_width_style; echo $overflow; ?>;" class="w-full pb-1">
-					</div>
-					<?php
-					if($attributes['enableCaption']){
+					// echo $height;
 					?>
-						<div class="flex-1 bg-gray-300 w-full opacity-75 pb-1">
-							<i class="material-icons text-gray-500 pmd-md float-left p-1"><?php echo $ico; ?></i>
-							<p id="caption-<?php echo $id; ?>" class="text-black-600 text-md p-2"><?php echo $itemName; ?></p>
+						<div class="<?php echo $grid;?> relative m-0.5 bg-gray-100 border border-blue-100 border-solid flex flex-wrap overflow-hidden mb-2" title=<?php echo $id; ?>>
+							<div id=<?php echo $id; ?> class="relative overflow-auto m-1 flex-1 z-0" style="<?php echo $height_width_style; ?>"></div>
+							<?php
+								if($attributes['enableCaption']){
+							?>
+							<div class="bg-gray-800 w-full absolute inset-x-0 bottom-0 opacity-75 z-20 -mt-8 pb-1 flex-1 align-middle">
+								<i class="material-icons text-gray-100 pmd-md float-left font-size: text-base mt-1 font-hairline "><?php echo $ico; ?></i>
+								<p id="caption-<?php echo $id; ?>" class="mb-0 text-gray-100 text-xs font-sans leading-tight w-full mt-1 font-hairline"><?php echo $itemName; ?></p>
+							</div>	
+							<?php
+								}
+							?>
 						</div>
 					<?php
-						}
-					?>
-				</div>
-			<?php
-			}
-			if (strcmp($displayMode, 'slideshow') == 0) {
-			?>
-				<script>
-					var x = <?php echo $slideshowSettings; ?>;
-					var defaultConfig = {
-						mode: 'fade',
-						pause: 60000,
-						responsive: true,
-						captions: true,
-						slideSelector: 'div.dhis2-slide',
-						pager: false,
-						auto: true,
-						autoDirection: true,
-						autoHover: true,
-						keyboardEnabled: true,
-						captions: true,
+				}
+				if(!empty($resources_analysis) && ($group_resources)){
+					$ico = "link";
+					foreach($resource_blocks as $resource_block){
+						?>
+						<div style="overflow:auto;" class="<?php echo $grid; ?> flex-none bg-gray-100 w-full pb-1 border-all border-gray-200">
+							<?php
+								if($attributes['enableCaption']){
+								?>
+									<div class="flex-1 bg-gray-800 w-full w-full opacity-75 pb-1 h-auto flex-1 align-middle">
+										<i class="material-icons text-gray-100 pmd-md float-left font-size: text-base"><?php echo $ico; ?></i>
+										<p id="caption-<?php echo $id; ?>" class="mb-0 text-gray-100 text-xs font-sans leading-tight w-full mt-1 font-hairline">Resources</p>
+									</div>
+								<?php
+								}
+							?>
+							<ul class="flex flex-wrap w-full border-all border-gray-200 p-0" id="<?php echo $resource_block; ?>" style="padding:0px; overflow: auto">
+		
+							</ul>
+						</div>
+					<?php
 					}
-					for (var prop in x) {
-						if (prop === 'pause') {
-							defaultConfig[prop] = parseInt(x[prop], 10);
-						}
-					}
-					$('.slideshow').bxSlider(defaultConfig);
-				</script>
-		<?php
+				}
 			}
-		}
 		?>
 	</div>
 <?php
+	if (strcmp($displayMode, 'slideshow') == 0) {
+		?>
+			<script>
+				var x = <?php echo $slideshowSettings; ?>;
+				// alert(x);
+				var defaultConfig = {
+					mode: 'fade',
+					pause: 60000,
+					responsive: true,
+					captions: true,
+					slideSelector: 'div.dhis2-slide',
+					pager: false,
+					auto: true,
+					autoDirection: true,
+					autoHover: true,
+					keyboardEnabled: true,
+					captions: true,
+				}
+				for (var prop in x) {
+					if (prop === 'pause') {
+						defaultConfig[prop] = parseInt(x[prop], 10);
+					}
+				}
+				$('.slideshow').bxSlider(defaultConfig);
+			</script>
+		<?php
+	}
 
 	$output = ob_get_contents(); // collect output
 	ob_end_clean(); // Turn off ouput buffer
