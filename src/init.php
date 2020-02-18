@@ -204,6 +204,18 @@ function dhis2_analytics_style()
 		plugins_url('src/assets/css/frontend/tailwind.min.css', dirname(__FILE__)),
 		false
 	);
+
+	wp_enqueue_style(
+		'dhis_analytics_slick-css',
+		plugins_url('src/assets/slick/slick.css', dirname(__FILE__)),
+		false
+	);
+
+	wp_enqueue_style(
+		'dhis_analytics_slick-theme-css',
+		plugins_url('src/assets/slick/slick-theme.css', dirname(__FILE__)),
+		false
+	);
 }
 
 function dhis2_analytics_script()
@@ -245,6 +257,13 @@ function dhis2_analytics_script()
 	wp_enqueue_script(
 		'dhis2_analytics-showdown-js',
 		plugins_url('src/assets/js/frontend/showdown.min.js', dirname(__FILE__)),
+		['jquery'],
+		false
+	);
+
+	wp_enqueue_script(
+		'dhis2_analytics-slick-js',
+		plugins_url('src/assets/slick/slick.min.js', dirname(__FILE__)),
 		['jquery'],
 		false
 	);
@@ -368,7 +387,7 @@ function displaySingleResources($resources_analysis, $details)
 				var name = rs_object['displayName'];
 				link.innerText = name;
 				link.setAttribute('href', url);
-				node.setAttribute('class',"list-none list-outside p-1 border border-gray-600 w-full hover:bg-gray-200  text-md align-middle");
+				node.setAttribute('class',"list-none list-outside p-1 border-b border-gray-300 w-full hover:bg-gray-200  text-md align-middle");
 				node.appendChild(link);
 				resource_list.appendChild(node);
 			});
@@ -397,7 +416,7 @@ function displayResources($resources_analysis, $details)
 				var name = rs_object['displayName'];
 				link.innerText = name;
 				link.setAttribute('href', url);
-				node.setAttribute('class',"list-none list-outside p-1 border border-gray-600 w-full hover:bg-gray-200");
+				node.setAttribute('class',"list-none list-outside p-1 border border-black-100 w-full hover:bg-gray-200");
 				node.appendChild(link);
 				resource_list.appendChild(node);
 			});
@@ -581,8 +600,9 @@ function render_dynamic_block($attributes)
 
 	// print_r($resources_analysis);
 	$all_ids = array_merge($rt_ids, $map_ids, $chart_ids, $text_ids, $resources_ids);
-
+	// print_r($resources_analysis);
 	if(!empty($resources_analysis)){
+		// echo "YES YES YES";
 		if($group_resources){
 			$all_ids = array_merge($rt_ids, $map_ids, $chart_ids, $text_ids);
 			displayResources($resources_analysis, $details);
@@ -617,7 +637,7 @@ function render_dynamic_block($attributes)
 	// 	$height = isset($attributes['displayHeight']) ? $attributes['displayHeight'] : $height;
 	// 	// $width = "100%";
 	// }
-		// echo $width;
+	// echo $width;
 	$slideshowSettings = json_encode($attributes['slideshowSettings']);
 
 	if ($displayMode == 'grid') {
@@ -656,16 +676,16 @@ function render_dynamic_block($attributes)
 
 					// echo $height;
 					?>
-						<div class="<?php echo $grid;?> relative m-0.5 bg-gray-100 border border-blue-100 border-solid flex flex-wrap overflow-hidden mb-2" title=<?php echo $id; ?>>
-							<div id=<?php echo $id; ?> class="relative overflow-auto m-1 flex-1 z-0" style="<?php echo $height_width_style; ?>"></div>
+						<div class="<?php echo $grid;?> m-0.5 bg-gray-100 border border-blue-100 border-solid flex flex-wrap overflow-hidden" title=<?php echo $id; ?>>
+							<div id=<?php echo $id; ?> class="relative overflow-auto z-0 m-1 flex-1" style="<?php echo $height_width_style; ?>"></div>
 							<?php
 								if($attributes['enableCaption']){
-							?>
-							<div class="bg-gray-800 w-full absolute inset-x-0 bottom-0 opacity-75 z-20 -mt-8 pb-1 flex-1 align-middle">
-								<i class="material-icons text-gray-100 pmd-md float-left font-size: text-base mt-1 font-hairline "><?php echo $ico; ?></i>
-								<p id="caption-<?php echo $id; ?>" class="mb-0 text-gray-100 text-xs font-sans leading-tight w-full mt-1 font-hairline"><?php echo $itemName; ?></p>
-							</div>	
-							<?php
+								?>
+								<div class="bg-gray-800 w-full inset-x-0 opacity-75 z-10 -mt-4 h-auto p-1 z-10">
+									<i class="material-icons text-gray-100 pmd-md float-left font-size: text-base font-hairline align-middle mb-2 "><?php echo $ico; ?></i>
+									<p id="caption-<?php echo $id; ?>" class="text-gray-100 text-xs font-sans leading-tight w-full font-hairline align-middle"><?php echo $itemName; ?></p>
+								</div>	
+								<?php
 								}
 							?>
 						</div>
@@ -679,14 +699,14 @@ function render_dynamic_block($attributes)
 							<?php
 								if($attributes['enableCaption']){
 								?>
-									<div class="flex-1 bg-gray-800 w-full w-full opacity-75 pb-1 h-auto flex-1 align-middle">
+									<div class="flex-1 bg-gray-800 w-full opacity-75 pb-1 h-auto align-middle">
 										<i class="material-icons text-gray-100 pmd-md float-left font-size: text-base"><?php echo $ico; ?></i>
 										<p id="caption-<?php echo $id; ?>" class="mb-0 text-gray-100 text-xs font-sans leading-tight w-full mt-1 font-hairline">Resources</p>
 									</div>
 								<?php
 								}
 							?>
-							<ul class="flex flex-wrap w-full border-all border-gray-200 p-0" id="<?php echo $resource_block; ?>" style="padding:0px; overflow: auto">
+							<ul class="flex flex-wrap w-full p-0" id="<?php echo $resource_block; ?>" style="padding:0px; overflow: auto">
 		
 							</ul>
 						</div>
@@ -697,32 +717,35 @@ function render_dynamic_block($attributes)
 		?>
 	</div>
 <?php
+	$theme = "slick"; //TODO: Make it configured from UI
 	if (strcmp($displayMode, 'slideshow') == 0) {
 		?>
-			<script>
-				var x = <?php echo $slideshowSettings; ?>;
-				// alert(x);
-				var defaultConfig = {
-					mode: 'fade',
-					pause: 60000,
-					responsive: true,
-					captions: true,
-					slideSelector: 'div.dhis2-slide',
-					pager: false,
-					auto: true,
-					autoDirection: true,
-					autoHover: true,
-					keyboardEnabled: true,
-					captions: true,
+		<script type="text/javascript">
+			$(document).ready(function(){
+				var slideshowsettings = <?php echo $slideshowSettings; ?>;
+				var speed = slideshowsettings['pause'];
+				var thespeed = 10000;
+				if((typeof speed === 'undefined') || speed < 10000){
+					thespeed = 10000;
+				}else{
+					thespeed = speed;
 				}
-				for (var prop in x) {
-					if (prop === 'pause') {
-						defaultConfig[prop] = parseInt(x[prop], 10);
-					}
-				}
-				$('.slideshow').bxSlider(defaultConfig);
-			</script>
-		<?php
+				$('.slideshow').slick({
+					adaptiveHeight: true,
+					dots: false,
+					pauseOnHover: true,
+					slidesToScroll: 1,
+					autoplay: true,
+					autoplaySpeed: thespeed,
+					infinite: true,
+					arrows: true,
+					swipeToSlide: true,
+					prevArrow: '<button type="button" class="slick-prev">Previous</button>',
+					nextArrow: '<button type="button" class="slick-next">Next</button>'
+				});
+			});
+		</script>
+	<?php
 	}
 
 	$output = ob_get_contents(); // collect output
